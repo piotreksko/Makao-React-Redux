@@ -1,0 +1,377 @@
+body {
+  margin-top: 60px;
+  margin-left: 20px;
+  margin-right: 20px;
+  background: #0e8b44
+    url("https://bfa.github.io/solitaire-js/img/green_felt.jpg") no-repeat
+    center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+.score {
+  margin-right: 10px;
+}
+
+.rules {
+  font-family: "Almendra", serif;
+  background-color: #f8f5de;
+  background-image: linear-gradient(
+    to right,
+    rgba(255, 210, 0, 0.4),
+    rgba(200, 160, 0, 0.1) 11%,
+    rgba(0, 0, 0, 0) 35%,
+    rgba(200, 160, 0, 0.1) 65%
+  );
+  opacity: 100;
+  text-align: justify;
+  text-justify: inter-word;
+  font-family: "Almendra", serif;
+  z-index: 99999;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  object-fit: contain;
+  max-height: 95%;
+  overflow: auto;
+  max-width: 800px;
+  padding: 10px;
+  border-radius: 10px;
+  min-width: 80%;
+  h1 {
+    text-align: center;
+    color: rgba(0, 0, 0, 0.9);
+  }
+
+  p,
+  span,
+  h2,
+  h4,
+  ul {
+    font-size: 16px;
+    color: rgba(0, 0, 0, 0.9);
+    display: block;
+    text-align: justify;
+    text-justify: inter-word;
+    padding-bottom: 10px;
+  }
+
+  p {
+    font-size: 12px;
+  }
+
+  i {
+    cursor: pointer;
+    display: block;
+    float: right;
+    font-style: normal;
+    font-family: arial, sans-serif;
+    color: #999;
+    background-color: #333;
+    padding: 4px 10px;
+    border-radius: 5px;
+    margin: 5px 6px 10px;
+    line-height: 1em;
+  }
+}
+
+.global-stats {
+  margin-left: 20px;
+}
+
+#score {
+  min-height: 110px;
+  position: relative;
+  background: rgba(0, 0, 0, 0.15);
+  margin: 1.5em 20% 0.5em 20%;
+  padding: 1em;
+  line-height: 1;
+  color: #fff;
+  font-size: 14px;
+
+  label {
+    font-weight: 700;
+    margin-bottom: 0;
+  }
+
+  > * {
+    display: inline-block;
+
+    &:last-child,
+    &:nth-last-child(2),
+    &:nth-last-child(3) {
+      float: right;
+      text-align: left;
+    }
+    &:first-child {
+      margin-right: 5px;
+    }
+  }
+
+  .message {
+    margin-left: 20px;
+    display: none;
+  }
+}
+
+.card {
+  height: 170px;
+  width: 120px;
+  background-size: 120px 170px;
+  background-repeat: no-repeat;
+  transition: 0.1s ease-in-out;
+}
+.available {
+  &:hover {
+    cursor: pointer;
+    -webkit-transform: translate(0px, -15px);
+    box-shadow: 0px 0px 5px 1px black;
+    -webkit-transition: all 0.3s;
+    -moz-transition: all 0.3s;
+    transition: all 0.3s;
+  }
+  -webkit-box-shadow: 0px 0px 3px 3px rgba(204, 255, 51, 0.9);
+  -moz-box-shadow: 0px 0px 3px 3px rgba(204, 255, 51, 0.9);
+  box-shadow: 0px 0px 3px 3px rgba(204, 255, 51, 0.9);
+}
+.possible {
+  &:hover {
+    cursor: pointer;
+    -webkit-transform: translate(0px, -15px);
+    box-shadow: 0px 0px 5px 1px black;
+    -webkit-transition: all 0.3s;
+    -moz-transition: all 0.3s;
+    transition: all 0.3s;
+  }
+  -webkit-box-shadow: 0px 0px 3px 3px rgba(52, 152, 218, 0.9);
+  -moz-box-shadow: 0px 0px 3px 3px rgba(52, 152, 218, 0.9);
+  box-shadow: 0px 0px 3px 3px rgba(52, 152, 218, 0.9);
+}
+.deckPossible {
+  &:hover {
+    cursor: pointer;
+    -webkit-transform: translate(0px, -10px);
+    box-shadow: 0px 0px 5px 1px black;
+    -webkit-transition: all 0.3s;
+    -moz-transition: all 0.3s;
+    transition: all 0.3s;
+  }
+  -webkit-box-shadow: 0px 0px 3px 3px rgba(102, 51, 153, 0.9);
+  -moz-box-shadow: 0px 0px 3px 3px rgba(102, 51, 153, 0.9);
+  box-shadow: 0px 0px 3px 3px rgba(102, 51, 153, 0.9);
+}
+.selected {
+  bottom: 30px;
+}
+.flex-container {
+  display: flex;
+  justify-content: center;
+}
+.row {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  margin-right: -15px;
+  margin-left: -15px;
+}
+#deck {
+  margin-right: 1%;
+  background-image: url("https://bfa.github.io/solitaire-js/img/card_back_bg.png");
+}
+.buttons {
+  text-align: center;
+    .btn {
+      width: 160px;
+    }
+}
+button {
+  overflow: auto;
+}
+.topCard {
+  -webkit-transition: all 0.5s;
+  -moz-transition: all 0.5s;
+  transition: all 0.5s;
+  -webkit-box-shadow: 0px 0px 4px 4px rgba(255, 127, 80, 0.9) !important;
+  -moz-box-shadow: 0px 0px 4px 4px rgba(255, 127, 80, 0.9) !important;
+  box-shadow: 0px 0px 4px 4px rgba(255, 127, 80, 0.9) !important;
+  &:hover {
+    color: #ff113c;
+    -webkit-animation: none;
+    -moz-animation: none;
+    animation: none;
+  }
+}
+#mask {
+  display: none;
+  background: #000;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 10;
+  width: 100%;
+  height: 100%;
+  opacity: 0.3;
+  z-index: 999;
+}
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.5);
+}
+.center {
+  text-align: center;
+  vertical-align: middle;
+}
+.win-box {
+  top: 50% !important;
+}
+.modal-shown {
+  opacity: .96;
+  transition: all 300ms linear;
+  visibility: visible;
+}
+.modal-hidden {
+  opacity: 0;
+  transition: all 300ms linear;
+  visibility: hidden;
+}
+.suit-popup {
+  min-width: 300px;
+  background: #333;
+  padding: 10px;
+  border: 1px solid #ddd;
+  font-size: 1.2em;
+  position: fixed;
+  margin-top: -86px;
+  transform: translate(-50%, -50%);
+  top: 40%;
+  left: 50%;
+  z-index: 99999;
+  box-shadow: 0px 0px 20px #999;
+  -moz-box-shadow: 0px 0px 20px #999;
+  -webkit-box-shadow: 0px 0px 20px #999;
+  border-radius: 3px 3px 3px 3px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  overflow: hidden;
+
+  span,
+  h2,
+  h4 {
+    color: #fff;
+    font-size: 15px;
+    line-height: 18px;
+    display: block;
+    text-align: center;
+    padding-bottom: 10px;
+  }
+}
+fieldset {
+  border: none;
+}
+.suit-icon {
+  width: 40px;
+  height: 40px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  border: 1px solid #333;
+  background-color: white;
+  cursor: pointer;
+  padding: 0;
+  margin: 10px 0;
+  &:hover {
+    background-color: #f7f7f7;
+  }
+}
+.rules-icon {
+  width: 40px !important;
+  height: 40px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  border: 0;
+  background: rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  padding: 0;
+  margin: 10px 15px 10px 10px;
+  &:hover {
+    background: rgba(0, 0, 0, 0.3);
+  }
+}
+.demand-icons {
+  margin: 0 15px;
+}
+.icon-image {
+  width: 30px;
+  height: 30px;
+  text-align: center;
+}
+.newWeight {
+  color: #999;
+  font-size: 15px;
+  line-height: 18px;
+  display: block;
+  text-align: center;
+  padding-bottom: 10px;
+}
+.invisible {
+  display: none;
+}
+#cpuContainer {
+  margin-top: 2%;
+}
+#playerContainer {
+  margin-bottom: 2%;
+}
+.cardsInHand {
+  margin-left: -95px;
+}
+.cards-container {
+  min-height: 170px;
+  margin: 2rem 0;
+}
+
+#reset {
+  background: url(https://cdn4.iconfinder.com/data/icons/game-general-icon-set-1/512/reset-512.png);
+  background-size: 20px 20px;
+  width: 20px;
+  background-repeat: no-repeat;
+  background-position: center;
+  height: 20px;
+}
+#confetti {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10000;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.wait-battle-counter {
+  background-color: #333;
+}
+
+.cards-counter {
+  background-color: #333;
+}
+
+@media only screen and (min-width: 480px) and (max-width: 1024px) {
+  #score {
+    margin: 1.5em 5% 0.5em 5%;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  #score {
+    margin: 1.5em 0 0.5em 0;
+  }
+}
