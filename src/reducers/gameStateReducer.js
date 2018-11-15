@@ -9,7 +9,8 @@ import {
   CHANGE_SUIT,
   DEMAND_CARD,
   SHUFFLE_DECK,
-  CPU_WAIT
+  CPU_WAIT,
+  RESTART_GAME
 } from "../actions/logicActions";
 import { cardTypes, cardWeights } from "../constants/constants";
 import { sortCards } from "../utility/utility";
@@ -111,6 +112,7 @@ export default function(state = initialState(), action) {
         chosenType: action.chosenType
       };
     case SHUFFLE_DECK:
+    debugger;
       return {
         ...state,
         deck: [...state.deck, ...action.cards],
@@ -128,7 +130,7 @@ export default function(state = initialState(), action) {
       return {
         ...state
       };
-    case 'PLAYER_WAIT':
+    case "PLAYER_WAIT":
       return {
         ...state
       };
@@ -142,6 +144,8 @@ export default function(state = initialState(), action) {
         ...state,
         items: action.payload
       };
+    case RESTART_GAME:
+      return initialState()
     default:
       return state;
   }

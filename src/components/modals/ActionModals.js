@@ -37,7 +37,7 @@ const ActionModals = props => {
       >
         <GameOverModal
           show={props.show.gameOver}
-          whoWon={props.whoWon}
+          playerWon={props.playerWon}
           restartGame={props.restartGame}
         />
       </ReactModal>

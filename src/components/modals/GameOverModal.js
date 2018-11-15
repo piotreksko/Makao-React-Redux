@@ -1,7 +1,6 @@
 import React from "react";
 
 export default function GameOverModal(props) {
-  debugger;
   return (
     <div
       className={`center ${

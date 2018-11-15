@@ -10,6 +10,7 @@ export const FETCH_STATS = "FETCH_STATS";
 export const CHANGE_SUIT = "CHANGE_SUIT";
 export const DEMAND_CARD = "DEMAND_CARD";
 export const SHUFFLE_DECK = "SHUFFLE_DECK";
+export const RESTART_GAME = "RESTART_GAME";
 var _ = require("lodash");
 // const ref = firebase.database().ref("/winCounter");
 
@@ -117,7 +118,11 @@ export function makePlayerMove(cards) {
       dispatch({ type: "SHOW_MODAL", modal: "ace" });
       return;
     }
-    if (gameFactors.jackActive && changeDemand) {
+    if (
+      gameFactors.jackActive &&
+      changeDemand &&
+      getState().gameState.player.cards.length
+    ) {
       dispatch({ type: "SHOW_MODAL", modal: "jack" });
       return;
     }
@@ -133,11 +138,10 @@ export function makePlayerMove(cards) {
     if (
       (!gameState.aceActive && !gameState.jackActive) ||
       (gameState.jackActive && cards[cards.length - 1].type !== "jack")
-    )
-      {
-        dispatch(makeCpuMove());
-        dispatch(checkMacaoAndWin());
-      }
+    ) {
+      dispatch(makeCpuMove());
+      dispatch(checkMacaoAndWin());
+    }
     // If jack is active, but player did not use it this turn
   };
 }
@@ -209,6 +213,7 @@ export function updateCpuCards(cards) {
 
 export function shuffleDeck() {
   return function(dispatch, getState) {
+    debugger;
     const { pile } = getState().gameState;
     let cardsForShuffle = _.cloneDeep(pile);
     cardsForShuffle.pop();
@@ -240,16 +245,20 @@ export function newGame() {
 export function checkMacaoAndWin() {
   return function(dispatch, getState) {
     const gameState = getState().gameState;
-    debugger;
-    if (gameState.player.cards.length === 1 || gameState.cpuPlayer.cards.length === 1) {
+    if (
+      gameState.player.cards.length === 1 ||
+      gameState.cpuPlayer.cards.length === 1
+    ) {
       dispatch({ type: "SHOW_MODAL", modal: "macao" });
       setTimeout(() => {
         dispatch({ type: "HIDE_MODAL", modal: "macao" });
       }, 1000);
     }
 
-    debugger;
-    if (gameState.player.cards.length === 0 || gameState.cpuPlayer.cards.length === 0)
+    if (
+      gameState.player.cards.length === 0 ||
+      gameState.cpuPlayer.cards.length === 0
+    )
       dispatch({ type: "SHOW_MODAL", modal: "gameOver" });
   };
 }
@@ -336,18 +345,23 @@ export function makeCpuMove() {
         };
       });
 
-      let neutralCards = cpuPossibleMoves.filter(
-        card =>
-          card.type === "5" ||
-          card.type === "6" ||
-          card.type === "7" ||
-          card.type === "8" ||
-          card.type === "9" ||
-          card.type === "10" ||
-          card.type === "queen" ||
-          (card.type === "king" && card.weight === "diamonds") ||
-          (card.type === "king" && card.weight === "clubs")
-      );
+      let neutralCards = getNeutralCards(cpuPossibleMoves);
+      let allNeutralCards = getNeutralCards(newCpuCards);
+
+      function getNeutralCards(array) {
+        return array.filter(
+          card =>
+            card.type === "5" ||
+            card.type === "6" ||
+            card.type === "7" ||
+            card.type === "8" ||
+            card.type === "9" ||
+            card.type === "10" ||
+            card.type === "queen" ||
+            (card.type === "king" && card.weight === "diamonds") ||
+            (card.type === "king" && card.weight === "clubs")
+        );
+      }
       let battleCards = cpuPossibleMoves.filter(
         card =>
           card.type === "2" ||
@@ -588,15 +602,16 @@ export function makeCpuMove() {
               gameFactors.waitTurn += 1;
               break;
             case "jack":
-              if (neutralCards.length) {
-                gameFactors.chosenType = neutralCards.reduce((prev, curr) =>
+              if (allNeutralCards.length) {
+                for (let i = 0; i < 2; i++) {
+                  let index = allNeutralCards.findIndex(x => x.type === "king");
+                  if (index !== -1)
+                    allNeutralCards = allNeutralCards.slice(index, 1);
+                  else i = 2;
+                }
+                gameFactors.chosenType = allNeutralCards.reduce((prev, curr) =>
                   prev.sameTypeAmount < curr.sameTypeAmount ? prev : curr
                 ).type;
-                if (gameFactors.chosenType.type === "king") {
-                  gameFactors.chosenType = 0;
-                }
-                //console.log("chosenType");
-                //console.log(chosenType);
               }
               gameFactors.chosenType
                 ? (gameFactors.jackActive = 2)
@@ -683,6 +698,7 @@ export function makeCpuMove() {
         // Take one card - default amount
         else {
           if (deck.length === 1) {
+            debugger;
             dispatch(shuffleDeck());
           }
           dispatch(takeCard(1, "cpuPlayer"));

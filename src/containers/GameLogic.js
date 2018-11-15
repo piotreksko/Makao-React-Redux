@@ -145,8 +145,8 @@ class GameLogic extends Component {
   }
 
   restartGame() {
-    console.log("restarted");
-    // Todo
+    this.props.restartGame();
+    this.props.hideModal('gameOver')
   }
 
   changeSuit(weight) {
@@ -296,7 +296,7 @@ class GameLogic extends Component {
       playerCanMove =
         (!gameState.player.wait ||
         (pileTopCard.type === "4" && !gameState.cpuPlayer.wait)) && !playerCanWait,
-      playerWon = gameState.player.cards ? false : true;
+      playerWon = gameState.player.cards.length ? false : true;
 
     return (
       <Aux>
@@ -358,7 +358,8 @@ const mapDispatchToProps = dispatch => {
       dispatch(logicActions.updateGameFactor("playerTurn", false));
       dispatch(logicActions.makeCpuMove());
       dispatch(logicActions.checkMacaoAndWin());
-    }
+    },
+    restartGame: () => dispatch({ type: logicActions.RESTART_GAME })
   };
 };
 
