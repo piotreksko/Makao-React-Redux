@@ -5,7 +5,7 @@ export const TAKE_FROM_DECK = "TAKE_FROM_DECK";
 export const ADD_TO_PILE = "ADD_TO_PILE";
 export const UPDATE_GAME_FACTOR = "UPDATE_GAME_FACTOR";
 export const UPDATE_CPU_CARDS = "UPDATE_CPU_CARDS";
-export const CPU_WAIT = "CPU_WAIT";
+export const WAIT_TURNS = "WAIT_TURNS";
 export const FETCH_STATS = "FETCH_STATS";
 export const CHANGE_SUIT = "CHANGE_SUIT";
 export const DEMAND_CARD = "DEMAND_CARD";
@@ -73,7 +73,7 @@ export function makePlayerMove(cards) {
           }
           break;
         case "jack":
-          gameFactors.jackActive = 3;
+          gameFactors.jackActive = 2;
           changeDemand = 1;
           break;
         case "ace":
@@ -108,7 +108,8 @@ export function makePlayerMove(cards) {
     else gameFactors.battleCardActive = false;
 
     _.forOwn(gameFactors, function(value, key) {
-      if (value !== gameState[key]) dispatch(updateGameFactor(key, value));
+      if (value !== gameState[key] && value)
+        dispatch(updateGameFactor(key, value));
     });
     dispatch(addToPile(cards));
     dispatch(updatePlayerCards(newPlayerCards));
@@ -118,16 +119,12 @@ export function makePlayerMove(cards) {
       dispatch({ type: "SHOW_MODAL", modal: "ace" });
       return;
     }
-    if (
-      gameFactors.jackActive &&
-      changeDemand &&
-      getState().gameState.player.cards.length
-    ) {
+    if (gameFactors.jackActive && changeDemand && newPlayerCards.length) {
       dispatch({ type: "SHOW_MODAL", modal: "jack" });
       return;
     }
 
-    gameState.nextTurn = 1;
+    // gameState.nextTurn = 1;
 
     //Decrease jack counter
     if (gameState.jackActive) {
@@ -135,14 +132,21 @@ export function makePlayerMove(cards) {
       return;
     }
 
-    if (
-      (!gameState.aceActive && !gameState.jackActive) ||
-      (gameState.jackActive && cards[cards.length - 1].type !== "jack")
-    ) {
+    if (!gameState.aceActive && !gameState.jackActive) {
       dispatch(makeCpuMove());
       dispatch(checkMacaoAndWin());
     }
     // If jack is active, but player did not use it this turn
+  };
+}
+
+export function waitTurns(who) {
+  return function(dispatch, getState) {
+    const gameState = getState().gameState;
+    if (gameState.waitTurn) {
+      dispatch(updateGameFactor("waitTurn", 0));
+      dispatch({ type: "WAIT_TURNS", waitTurns: gameState.waitTurn - 1 });
+    } else dispatch({ type: "WAIT_TURNS", waitTurns: gameState[who].wait - 1 });
   };
 }
 
@@ -155,9 +159,13 @@ export function addToPile(cards) {
   };
 }
 
-export function takeCard(howMany, who) {
+export function takeCards(who) {
   return function(dispatch, getState) {
+    debugger;
     const gameState = getState().gameState;
+    let howMany = gameState.cardsToTake - 1;
+    if (!howMany) howMany = 1;
+
     let deck = gameState.deck;
     if (deck.length < howMany) {
       dispatch(shuffleDeck);
@@ -170,21 +178,23 @@ export function takeCard(howMany, who) {
     });
     let cardsToUpdate = sortCards([
       ...cardsToTake,
-      ..._.cloneDeep(getState().gameState[who].cards)
+      ..._.cloneDeep(gameState[who].cards)
     ]);
+
+    if (who === "player") dispatch(updatePlayerCards(cardsToUpdate));
+    else dispatch(updateCpuCards(cardsToUpdate));
 
     if (gameState.battleCardActive)
       dispatch(updateGameFactor("battleCardActive", false));
+
     if (gameState.cardsToTake > 1) dispatch(updateGameFactor("cardsToTake", 1));
-    if (who === "player") dispatch(updatePlayerCards(cardsToUpdate));
-    else dispatch(updateCpuCards(cardsToUpdate));
-    dispatch(updateGameFactor("nextTurn", !getState().gameState.nextTurn));
+    // dispatch(updateGameFactor("nextTurn", !getState().gameState.nextTurn));
   };
 }
 
 export function updatePlayerCards(cards) {
   return function(dispatch, getState) {
-    dispatch(updateGameFactor("nextTurn", 1));
+    // dispatch(updateGameFactor("nextTurn", 1));
     dispatch({ type: UPDATE_PLAYER_CARDS, cards });
   };
 }
@@ -193,27 +203,27 @@ export function updateGameFactor(factor, value) {
   return dispatch => {
     dispatch({
       type: "UPDATE_GAME_FACTOR",
-      factor: factor,
+      factor,
       value
     });
   };
 }
 
 export function updateCpuCards(cards) {
-  cards = cards.map(card => {
-    card = _.omit(card, "sameTypeAmount");
-    card = _.omit(card, "sameWeightAmount");
-    return card;
-  });
   return function(dispatch, getState) {
-    dispatch(updateGameFactor("nextTurn", 0));
+    debugger;
+    cards = cards.map(card => {
+      card = _.omit(card, "sameTypeAmount");
+      card = _.omit(card, "sameWeightAmount");
+      return card;
+    });
     dispatch({ type: "UPDATE_CPU_CARDS", cards });
+    // dispatch(updateGameFactor("nextTurn", 0));
   };
 }
 
 export function shuffleDeck() {
   return function(dispatch, getState) {
-    debugger;
     const { pile } = getState().gameState;
     let cardsForShuffle = _.cloneDeep(pile);
     cardsForShuffle.pop();
@@ -294,10 +304,10 @@ export function makeCpuMove() {
       cardsToUse = [];
 
     if (getState().modals.gameOver) return;
-
     const nobodyIsWaiting = () => {
       return !playerWait && !cpuWait;
     };
+
     pileTopCard.type === "ace"
       ? (availableCards = newCpuCards.filter(
           card =>
@@ -314,8 +324,10 @@ export function makeCpuMove() {
         card => "jack" === card.type || card.type === gameFactors.chosenType
       );
     }
-
     //IF CPU does have available cards
+
+    debugger;
+
     if (availableCards.length) {
       //console.log("cpu had available cards");
 
@@ -552,7 +564,7 @@ export function makeCpuMove() {
       }
 
       if (randomNumber === 0) {
-        noCardsToUse();
+        return noCardsToUse();
       } else {
         let mostMoves = cardsToUse.reduce((prev, curr) =>
           prev.possibleCardsAfter < curr.possibleCardsAfter ? prev : curr
@@ -609,9 +621,12 @@ export function makeCpuMove() {
                     allNeutralCards = allNeutralCards.slice(index, 1);
                   else i = 2;
                 }
-                gameFactors.chosenType = allNeutralCards.reduce((prev, curr) =>
-                  prev.sameTypeAmount < curr.sameTypeAmount ? prev : curr
-                ).type;
+                if (allNeutralCards.length)
+                  gameFactors.chosenType = allNeutralCards.reduce(
+                    (prev, curr) =>
+                      prev.sameTypeAmount < curr.sameTypeAmount ? prev : curr
+                  ).type;
+                else gameFactors.chosenType = null;
               }
               gameFactors.chosenType
                 ? (gameFactors.jackActive = 2)
@@ -660,71 +675,39 @@ export function makeCpuMove() {
         availableCards = [];
         dispatch(addToPile(cpuSelectedCards));
       }
+      debugger;
+      newCpuCards = sortCards(newCpuCards);
+      dispatch(updateCpuCards(newCpuCards));
+      updateGameFactors();
     } else {
       noCardsToUse();
     }
     // gameState.playerTurn = true;
 
     function noCardsToUse() {
-      // console.log("no cards available");
-
-      // Take cards from pile and shuffle the deck if there is one card left
-
       if (gameFactors.jackActive) {
         gameFactors.jackActive -= 1;
       }
+      updateGameFactors();
 
       // Do nothing if last card was 4
-      if (waitTurn > 0) {
-        cpuWait = waitTurn - 1;
-        gameFactors.waitTurn = 0;
-        return;
-      } else if (cpuWait) {
-        cpuWait -= 1;
+      if (waitTurn > 0 || cpuWait) {
+        dispatch(waitTurns("cpuPlayer"));
       } else {
-        // Repeat the loop as many times as there are cards to be taken
-        if (gameFactors.cardsToTake > 1) {
-          // Shuffle the deck if there are not enough cards remaining in the deck
-          if (gameFactors.cardsToTake >= deck.length) {
-            dispatch(shuffleDeck());
-          }
-          dispatch(takeCard(gameFactors.cardsToTake, "cpuPlayer"));
-
-          for (let i = 1; i < gameFactors.cardsToTake; i++) {
-            newCpuCards.push(deck[deck.length - i]);
-          }
-        }
-
-        // Take one card - default amount
-        else {
-          if (deck.length === 1) {
-            debugger;
-            dispatch(shuffleDeck());
-          }
-          dispatch(takeCard(1, "cpuPlayer"));
-          newCpuCards.push(deck[deck.length - 1]);
-        }
-        gameFactors.cardsToTake = 1;
+        dispatch(takeCards("cpuPlayer"));
       }
     }
 
-    if (gameFactors.cardsToTake > 1) gameFactors.battleCardActive = true;
-    else gameFactors.battleCardActive = false;
+    function updateGameFactors() {
+      if (gameFactors.cardsToTake > 1) gameFactors.battleCardActive = true;
+      else gameFactors.battleCardActive = false;
 
-    _.forOwn(gameFactors, function(value, key) {
-      if (value !== gameState[key]) dispatch(updateGameFactor(key, value));
-    });
-
-    // gameFactors.forEach(factor => {
-    //   if (factor !== gameState[factor])
-    //     dispatch(updateGameFactor(factor.toString(), factor));
-    // });
-
-    if (cpuWait) {
-      dispatch({ type: CPU_WAIT });
-      dispatch(updateGameFactor("nextTurn", !gameState.nextTurn));
+      _.forOwn(gameFactors, function(value, key) {
+        debugger;
+        if (value !== gameState[key]) dispatch(updateGameFactor(key, value));
+      });
     }
-    newCpuCards = sortCards(newCpuCards);
-    dispatch(updateCpuCards(newCpuCards));
+
+    // dispatch(updateGameFactor("nextTurn", !gameState.nextTurn));
   };
 }

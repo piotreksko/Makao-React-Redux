@@ -9,7 +9,7 @@ import {
   CHANGE_SUIT,
   DEMAND_CARD,
   SHUFFLE_DECK,
-  CPU_WAIT,
+  WAIT_TURNS,
   RESTART_GAME
 } from "../actions/logicActions";
 import { cardTypes, cardWeights } from "../constants/constants";
@@ -36,9 +36,7 @@ const initialState = () => {
     waitTurn: 0,
     battleCardActive: false,
     winner: 0,
-    gameOver: false,
-    openAceDialog: false,
-    openJackDialog: false
+    gameOver: false
   };
 
   function card(type, weight) {
@@ -56,12 +54,13 @@ const initialState = () => {
 
   initGame.playerTurn = Math.round(Math.random() * 1);
   initGame.deck = _.shuffle(initGame.deck);
-  //Give out cards
+
+  // Deal cards
   (function assignCards() {
     initGame.player.cards = sortCards(initGame.deck.splice(0, 5));
     initGame.cpuPlayer.cards = sortCards(initGame.deck.splice(0, 5));
 
-    //Always start game with a neutral card
+    // Always start game with a neutral card
     for (let i = 0; i < initGame.deck.length; i++) {
       switch (initGame.deck[i].type) {
         case "5":
@@ -112,13 +111,14 @@ export default function(state = initialState(), action) {
         chosenType: action.chosenType
       };
     case SHUFFLE_DECK:
-    debugger;
+      debugger;
       return {
         ...state,
         deck: [...state.deck, ...action.cards],
         pile: [...state.pile.slice(-1)]
       };
     case UPDATE_CPU_CARDS:
+      debugger;
       return {
         ...state,
         cpuPlayer: {
@@ -126,13 +126,13 @@ export default function(state = initialState(), action) {
           cards: action.cards
         }
       };
-    case CPU_WAIT:
+    case WAIT_TURNS:
       return {
-        ...state
-      };
-    case "PLAYER_WAIT":
-      return {
-        ...state
+        ...state,
+        [action.who]: {
+          ...state[action.who],
+          wait: action.waitTurns
+        }
       };
     case UPDATE_GAME_FACTOR:
       return {
@@ -145,7 +145,7 @@ export default function(state = initialState(), action) {
         items: action.payload
       };
     case RESTART_GAME:
-      return initialState()
+      return initialState();
     default:
       return state;
   }

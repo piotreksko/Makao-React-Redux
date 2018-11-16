@@ -9,6 +9,9 @@ import Deck from "../components/Deck";
 import Header from "../components/Header";
 import Pile from "../components/Pile";
 import Player from "../components/Player";
+import BattleIcon from "../components/icons/BattleIcon";
+import DemandIcon from "../components/icons/DemandIcon";
+import SuitIcon from "../components/icons/SuitIcon";
 var _ = require("lodash");
 
 class GameLogic extends Component {
@@ -22,8 +25,8 @@ class GameLogic extends Component {
 
     this.clickOwnCard = this.clickOwnCard.bind(this);
     this.confirmCards = this.confirmCards.bind(this);
-    this.takeCard = this.takeCard.bind(this);
-    this.waitTurn = this.waitTurn.bind(this);
+    this.takeCards = this.takeCards.bind(this);
+    this.waitTurns = this.waitTurns.bind(this);
     this.changeSuit = this.changeSuit.bind(this);
     this.demandCard = this.demandCard.bind(this);
     this.restartGame = this.restartGame.bind(this);
@@ -134,19 +137,19 @@ class GameLogic extends Component {
     });
   }
 
-  takeCard() {
-    this.props.takeCard(this.props.gameState.cardsToTake);
+  takeCards() {
+    this.props.takeCards(this.props.gameState.cardsToTake);
     this.props.endTurn();
   }
 
-  waitTurn() {
+  waitTurns() {
     this.props.playerWait();
     this.props.endTurn();
   }
 
   restartGame() {
     this.props.restartGame();
-    this.props.hideModal('gameOver')
+    this.props.hideModal("gameOver");
   }
 
   changeSuit(weight) {
@@ -157,7 +160,7 @@ class GameLogic extends Component {
 
   demandCard(type) {
     this.props.updateGameFactor("chosenType", type);
-    this.props.updateGameFactor("jackActive", true);
+    if (type === "") this.props.updateGameFactor("jackActive", 0);
     this.props.hideModal("jack");
     this.props.endTurn();
   }
@@ -177,7 +180,7 @@ class GameLogic extends Component {
     const playerWait = gameState.player.wait;
     let newAvailable = [];
     let newPossible = [];
-    if (playerWait) return this.props.updateAvailableCards([]);
+    if (playerWait) return;
     if (pileTopCard.type === "ace") {
       const lastCardAfterAce = {
         type: "ace",
@@ -185,7 +188,6 @@ class GameLogic extends Component {
       };
       pileTopCard = Object.assign({}, lastCardAfterAce);
     }
-
     // No cards have been chosen
     if (!selectedCards.length) {
       cards.forEach((card, idx) => {
@@ -220,7 +222,7 @@ class GameLogic extends Component {
         if (jackActive) {
           if (
             card.type === chosenType ||
-            (card.type === "jack " && pileTopCard.type === "jack")
+            (card.type === "jack" && pileTopCard.type === "jack")
           )
             newAvailable.push(cards[idx]);
           return;
@@ -295,7 +297,8 @@ class GameLogic extends Component {
           : false,
       playerCanMove =
         (!gameState.player.wait ||
-        (pileTopCard.type === "4" && !gameState.cpuPlayer.wait)) && !playerCanWait,
+          (pileTopCard.type === "4" && !gameState.cpuPlayer.wait)) &&
+        !playerCanWait,
       playerWon = gameState.player.cards.length ? false : true;
 
     return (
@@ -313,8 +316,20 @@ class GameLogic extends Component {
         <Header />
         <CpuPlayer cpuPlayer={gameState.cpuPlayer} />
         <div className="flex-container">
-          <Deck takeCard={this.takeCard} playerCanMove={playerCanMove} />
+          <Deck takeCard={this.takeCards} playerCanMove={playerCanMove} />
           <Pile cardOnTop={pileTopCard} />
+          <BattleIcon battleCards={gameState.cardsToTake} />
+          <DemandIcon
+            jackActive={gameState.jackActive && !this.props.modals.jack}
+            chosenType={gameState.chosenType}
+          />
+          <SuitIcon
+            show={
+              gameState.pile[gameState.pile.length - 1].type === "ace" &&
+              !this.props.modals.ace
+            }
+            chosenWeight={gameState.chosenWeight}
+          />
         </div>
         <Player
           clickOwnCard={this.clickOwnCard}
@@ -328,7 +343,7 @@ class GameLogic extends Component {
         <ActionButtons
           confirmCards={this.confirmCards}
           hasSelected={this.state.selectedCards.length}
-          waitTurn={this.waitTurn}
+          waitTurn={this.waitTurns}
           playerCanWait={playerCanWait}
         />
       </Aux>
@@ -350,8 +365,8 @@ const mapDispatchToProps = dispatch => {
     makePlayerMove: cards => dispatch(logicActions.makePlayerMove(cards)),
     showModal: modal => dispatch({ type: "SHOW_MODAL", modal: modal }),
     hideModal: modal => dispatch({ type: "HIDE_MODAL", modal: modal }),
-    playerWait: () => dispatch({ type: "PLAYER_WAIT" }),
-    takeCard: howMany => dispatch(logicActions.takeCard(howMany, "player")),
+    playerWait: () => dispatch(logicActions.waitTurns("player")),
+    takeCards: howMany => dispatch(logicActions.takeCards("player")),
     updateGameFactor: (factor, value) =>
       dispatch(logicActions.updateGameFactor(factor, value)),
     endTurn: () => {

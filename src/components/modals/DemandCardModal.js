@@ -26,7 +26,7 @@ export default function DemandCardModal(props) {
         <button onClick={e => props.demandCard('queen')} className="suit-icon">
           Q
         </button>
-        <button onClick={e => props.demandCard} className="suit-icon">
+        <button onClick={e => props.demandCard('')} className="suit-icon">
           X
         </button>
       </div>
