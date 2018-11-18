@@ -38,7 +38,7 @@ const SuitIcon = props => {
     >
       <img
             alt="Chosen weight symbol"
-            className="icon-image blue-icon"
+            className="icon-image grey-icon"
             src={img}
           />
     </div>

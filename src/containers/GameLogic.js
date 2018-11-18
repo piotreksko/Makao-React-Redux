@@ -12,9 +12,10 @@ import Player from "../components/Player";
 import BattleIcon from "../components/icons/BattleIcon";
 import DemandIcon from "../components/icons/DemandIcon";
 import SuitIcon from "../components/icons/SuitIcon";
+import WaitIcon from "../components/icons/WaitIcon";
 var _ = require("lodash");
 
-class GameLogic extends Component {
+export class GameLogic extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -315,6 +316,7 @@ class GameLogic extends Component {
         />
         <Header />
         <CpuPlayer cpuPlayer={gameState.cpuPlayer} />
+          <WaitIcon waitTurn={gameState.cpuPlayer.wait} />
         <div className="flex-container">
           <Deck takeCard={this.takeCards} playerCanMove={playerCanMove} />
           <Pile cardOnTop={pileTopCard} />
@@ -330,6 +332,7 @@ class GameLogic extends Component {
             }
             chosenWeight={gameState.chosenWeight}
           />
+          <WaitIcon waitTurn={gameState.waitTurn} />
         </div>
         <Player
           clickOwnCard={this.clickOwnCard}
@@ -340,6 +343,7 @@ class GameLogic extends Component {
             selectedCards: this.state.selectedCards
           }}
         />
+          <WaitIcon waitTurn={gameState.player.wait} />
         <ActionButtons
           confirmCards={this.confirmCards}
           hasSelected={this.state.selectedCards.length}

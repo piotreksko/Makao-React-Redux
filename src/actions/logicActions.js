@@ -600,7 +600,7 @@ export function makeCpuMove() {
             }
           }
         }
-        //console.log(cpuSelectedCards);
+        
         cpuSelectedCards.forEach(card => {
           let notCheckedYet = true;
           switch (card.type) {
