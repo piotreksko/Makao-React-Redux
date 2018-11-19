@@ -43,7 +43,7 @@ const ActionModals = props => {
       </ReactModal>
 
       <MacaoModal
-        show={props.show.macao}
+        show={props.show.macao && !props.show.gameOver}
         playerMacao={props.playerMacao}
         cpuPlayerMacao={props.cpuPlayerMacao}
       />

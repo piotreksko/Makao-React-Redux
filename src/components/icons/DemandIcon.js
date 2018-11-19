@@ -5,7 +5,7 @@ const DemandIcon = props => {
     backgroundImage:
       "url(https://cdn.iconscout.com/icon/premium/png-256-thumb/demand-3-549092.png)"
   };
-  return props.jackActive ? (
+  return props.jackActive && !props.gameOver ? (
     <div
       className={`info-icon ${
         props.jackActive ? "modal-shown" : "modal-hidden"

@@ -1,12 +1,9 @@
 import React from "react";
+import Confetti from "react-dom-confetti";
 
 export default function GameOverModal(props) {
   return (
-    <div
-      className={`center ${
-        props.show ? "modal-shown" : "modal-hidden"
-      }`}
-    >
+    <div className={`center ${props.show ? "modal-shown" : "modal-hidden"}`}>
       <h2 style={{ color: props.playerWon ? "green" : "red" }}>
         {props.playerWon ? "Victory" : "Defeat"}
       </h2>

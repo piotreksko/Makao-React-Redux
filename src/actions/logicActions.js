@@ -132,7 +132,7 @@ export function makePlayerMove(cards) {
       return;
     }
 
-    if (!gameState.aceActive && !gameState.jackActive) {
+    if (!gameState.aceActive && !gameState.jackActive && newPlayerCards.length) {
       dispatch(makeCpuMove());
       dispatch(checkMacaoAndWin());
     }
@@ -304,9 +304,8 @@ export function makeCpuMove() {
       cardsToUse = [];
 
     if (getState().modals.gameOver) return;
-    const nobodyIsWaiting = () => {
-      return !playerWait && !cpuWait;
-    };
+
+    const nobodyIsWaiting = () => !playerWait && !cpuWait;
 
     pileTopCard.type === "ace"
       ? (availableCards = newCpuCards.filter(

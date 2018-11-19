@@ -389,13 +389,13 @@ fieldset {
   background-position: center;
   height: 20px;
 }
-#confetti {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 10000;
+.confetti {
+  position: fixed;
+  transform: translate(-50%, -50%);
+  left: 50%;
+  top: 50%;
+  z-index: 100000;
   pointer-events: none;
-  opacity: 0;
 }
 
 .particles {

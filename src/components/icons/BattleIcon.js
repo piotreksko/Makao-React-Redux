@@ -5,7 +5,7 @@ const BattleIcon = props => {
     backgroundImage:
       "url(https://cdn.iconscout.com/icon/premium/png-256-thumb/swords-56-798933.png)"
   };
-  return props.battleCards > 1 ? (
+  return props.battleCards > 1 && !props.gameOver ? (
     <div
       className={`info-icon ${
         props.battleCards > 1 ? "modal-shown" : "modal-hidden"

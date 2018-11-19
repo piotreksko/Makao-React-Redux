@@ -13,6 +13,7 @@ import BattleIcon from "../components/icons/BattleIcon";
 import DemandIcon from "../components/icons/DemandIcon";
 import SuitIcon from "../components/icons/SuitIcon";
 import WaitIcon from "../components/icons/WaitIcon";
+import Confetti from "react-dom-confetti";
 var _ = require("lodash");
 
 export class GameLogic extends Component {
@@ -300,7 +301,14 @@ export class GameLogic extends Component {
         (!gameState.player.wait ||
           (pileTopCard.type === "4" && !gameState.cpuPlayer.wait)) &&
         !playerCanWait,
-      playerWon = gameState.player.cards.length ? false : true;
+      playerWon = !gameState.player.cards.length ? true : false;
+    const config = {
+      angle: 90,
+      spread: 100,
+      startVelocity: 50,
+      elementCount: 100,
+      decay: 0.9
+    };
 
     return (
       <Aux>
@@ -314,16 +322,23 @@ export class GameLogic extends Component {
           playerMacao={gameState.player.cards.length === 1}
           restartGame={this.restartGame}
         />
+        <div className="confetti">
+          <Confetti active={!this.props.gameState.player.cards.length} config={config} />
+        </div>
         <Header />
         <CpuPlayer cpuPlayer={gameState.cpuPlayer} />
-          <WaitIcon waitTurn={gameState.cpuPlayer.wait} />
+        <WaitIcon waitTurn={gameState.cpuPlayer.wait} />
         <div className="flex-container">
           <Deck takeCard={this.takeCards} playerCanMove={playerCanMove} />
           <Pile cardOnTop={pileTopCard} />
-          <BattleIcon battleCards={gameState.cardsToTake} />
+          <BattleIcon
+            battleCards={gameState.cardsToTake}
+            gameOver={gameState.gameOver}
+          />
           <DemandIcon
             jackActive={gameState.jackActive && !this.props.modals.jack}
             chosenType={gameState.chosenType}
+            gameOver={gameState.gameOver}
           />
           <SuitIcon
             show={
@@ -331,8 +346,12 @@ export class GameLogic extends Component {
               !this.props.modals.ace
             }
             chosenWeight={gameState.chosenWeight}
+            gameOver={gameState.gameOver}
           />
-          <WaitIcon waitTurn={gameState.waitTurn} />
+          <WaitIcon
+            waitTurn={gameState.waitTurn}
+            gameOver={gameState.gameOver}
+          />
         </div>
         <Player
           clickOwnCard={this.clickOwnCard}
@@ -343,7 +362,7 @@ export class GameLogic extends Component {
             selectedCards: this.state.selectedCards
           }}
         />
-          <WaitIcon waitTurn={gameState.player.wait} />
+        <WaitIcon waitTurn={gameState.player.wait} />
         <ActionButtons
           confirmCards={this.confirmCards}
           hasSelected={this.state.selectedCards.length}

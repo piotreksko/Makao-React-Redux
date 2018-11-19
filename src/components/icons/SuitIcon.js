@@ -31,7 +31,7 @@ const SuitIcon = props => {
       "url(https://cdn1.iconfinder.com/data/icons/ui-glynh-04-of-5/100/UI_Glyph_07-07-512.png)"
   };
 
-  return props.show ? (
+  return props.show && !props.gameOver ? (
     <div
       className={`info-icon ${props.show ? "modal-shown" : "modal-hidden"}`}
       style={style}
