@@ -2,10 +2,10 @@ import React, { Component } from "react";
 import Card from "./cards/Card";
 import WaitIcon from "../components/icons/WaitIcon";
 import PropTypes from "prop-types";
-var _ = require('lodash');
+var _ = require("lodash");
 
 class Player extends Component {
-  stylePlayerCards (playerCards, groupedCards){
+  stylePlayerCards(playerCards, groupedCards) {
     const { availableCards, possibleCards, selectedCards } = groupedCards;
     let cards = _.cloneDeep(playerCards);
 
@@ -64,7 +64,7 @@ class Player extends Component {
         });
       });
     };
-    
+
     stylePossibleCards(cards);
     styleAvailableCards(cards);
     styleTopCard(cards);
@@ -75,30 +75,34 @@ class Player extends Component {
     //   .styleTopCard(cards);
 
     return cards;
-  };
+  }
 
-  checkClass (card){
+  checkClass(card) {
     if (card.isSelected) {
       card.class += " selected";
     }
-    return card.class ? card.class : '';
+    return card.class ? card.class : "";
   }
 
-  
   render() {
-  let playerCards = this.props.player.cards;
+    let playerCards = this.props.player.cards;
 
     return (
       <div className={"flex-container cards-container"}>
         <div className={"row cards"}>
-          {this.stylePlayerCards(playerCards, this.props.groupedCards).map((card, index) => (
-            <Card key={index} clickOwnCard={this.props.clickOwnCard} card={card} index={index} cardClass={this.checkClass(card) + ' cardsInHand'} />
-          ))}
+          {this.stylePlayerCards(playerCards, this.props.groupedCards).map(
+            (card, index) => (
+              <Card
+                key={index}
+                clickOwnCard={this.props.clickOwnCard}
+                card={card}
+                index={index}
+                cardClass={this.checkClass(card) + " cardsInHand"}
+              />
+            )
+          )}
         </div>
-        <WaitIcon
-          waitTurn={this.props.player.wait}
-          playerIcon={true}
-        />
+        <WaitIcon waitTurn={this.props.player.wait} />
       </div>
     );
   }
@@ -113,7 +117,7 @@ Player.propTypes = {
   groupedCards: PropTypes.shape({
     selectedCards: PropTypes.array,
     availableCards: PropTypes.array,
-    possibleCards: PropTypes.array,
+    possibleCards: PropTypes.array
   })
 };
 
