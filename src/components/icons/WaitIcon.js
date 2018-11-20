@@ -5,10 +5,12 @@ const WaitIcon = props => {
     backgroundImage:
       "url(https://cdn4.iconfinder.com/data/icons/about-time-line/100/time-hourglass-512.png)"
   };
+  const styleClass = props.playerInfo ? 'player-wait-icon' : 'info-icon';
+  debugger;
   return props.waitTurn && !props.gameOver ? (
     <div
-      className={`info-icon ${
-        props.waitTurn > 1 ? "modal-shown" : "modal-hidden"
+      className={`${styleClass} ${
+        props.waitTurn ? "modal-shown" : "modal-hidden"
       }`}
       style={style}
     >

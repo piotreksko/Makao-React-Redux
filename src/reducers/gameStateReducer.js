@@ -57,7 +57,7 @@ const initialState = () => {
 
   // Deal cards
   (function assignCards() {
-    initGame.player.cards = sortCards(initGame.deck.splice(0, 5));
+    initGame.player.cards = sortCards(initGame.deck.splice(0, 15));
     initGame.cpuPlayer.cards = sortCards(initGame.deck.splice(0, 5));
 
     // Always start game with a neutral card
@@ -111,14 +111,12 @@ export default function(state = initialState(), action) {
         chosenType: action.chosenType
       };
     case SHUFFLE_DECK:
-      debugger;
       return {
         ...state,
         deck: [...state.deck, ...action.cards],
         pile: [...state.pile.slice(-1)]
       };
     case UPDATE_CPU_CARDS:
-      debugger;
       return {
         ...state,
         cpuPlayer: {

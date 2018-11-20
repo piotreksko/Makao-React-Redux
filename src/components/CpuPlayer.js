@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import Card from "./cards/Card";
 import CardBack from "./cards/CardBack";
+import WaitIcon from "../components/icons/WaitIcon";
 import PropTypes from 'prop-types';
 
 class CpuPlayer extends Component {
@@ -12,6 +13,7 @@ class CpuPlayer extends Component {
             <CardBack key={index} />
           ))}
         </div>
+        <WaitIcon waitTurn={this.props.cpuPlayer.wait} playerInfo={true} />
       </div>
     );
   }

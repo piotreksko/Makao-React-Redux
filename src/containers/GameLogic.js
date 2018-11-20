@@ -323,11 +323,13 @@ export class GameLogic extends Component {
           restartGame={this.restartGame}
         />
         <div className="confetti">
-          <Confetti active={!this.props.gameState.player.cards.length} config={config} />
+          <Confetti
+            active={!this.props.gameState.player.cards.length}
+            config={config}
+          />
         </div>
         <Header />
         <CpuPlayer cpuPlayer={gameState.cpuPlayer} />
-        <WaitIcon waitTurn={gameState.cpuPlayer.wait} />
         <div className="flex-container">
           <Deck takeCard={this.takeCards} playerCanMove={playerCanMove} />
           <Pile cardOnTop={pileTopCard} />
@@ -351,18 +353,18 @@ export class GameLogic extends Component {
           <WaitIcon
             waitTurn={gameState.waitTurn}
             gameOver={gameState.gameOver}
+            playerIcon={true}
           />
         </div>
         <Player
           clickOwnCard={this.clickOwnCard}
-          playerCards={gameState.player.cards}
+          player={gameState.player}
           groupedCards={{
             availableCards: this.state.availableCards,
             possibleCards: this.state.possibleCards,
             selectedCards: this.state.selectedCards
           }}
         />
-        <WaitIcon waitTurn={gameState.player.wait} />
         <ActionButtons
           confirmCards={this.confirmCards}
           hasSelected={this.state.selectedCards.length}

@@ -1,10 +1,10 @@
 import React, { Component } from "react";
 import Card from "./cards/Card";
+import WaitIcon from "../components/icons/WaitIcon";
 import PropTypes from "prop-types";
 var _ = require('lodash');
 
 class Player extends Component {
-
   stylePlayerCards (playerCards, groupedCards){
     const { availableCards, possibleCards, selectedCards } = groupedCards;
     let cards = _.cloneDeep(playerCards);
@@ -86,13 +86,19 @@ class Player extends Component {
 
   
   render() {
+  let playerCards = this.props.player.cards;
+
     return (
       <div className={"flex-container cards-container"}>
         <div className={"row cards"}>
-          {this.stylePlayerCards(this.props.playerCards, this.props.groupedCards).map((card, index) => (
+          {this.stylePlayerCards(playerCards, this.props.groupedCards).map((card, index) => (
             <Card key={index} clickOwnCard={this.props.clickOwnCard} card={card} index={index} cardClass={this.checkClass(card) + ' cardsInHand'} />
           ))}
         </div>
+        <WaitIcon
+          waitTurn={this.props.player.wait}
+          playerIcon={true}
+        />
       </div>
     );
   }

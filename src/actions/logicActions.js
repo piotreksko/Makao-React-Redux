@@ -73,7 +73,7 @@ export function makePlayerMove(cards) {
           }
           break;
         case "jack":
-          gameFactors.jackActive = 2;
+          gameFactors.jackActive = 3;
           changeDemand = 1;
           break;
         case "ace":
@@ -97,7 +97,7 @@ export function makePlayerMove(cards) {
           break;
       }
 
-      //Remove cards from playerCards
+      // Remove cards from playerCards
       let cardIndexInPlayerCards = newPlayerCards.findIndex(
         c => card.type === c.type && card.weight === c.weight
       );
@@ -106,6 +106,9 @@ export function makePlayerMove(cards) {
 
     if (gameFactors.cardsToTake > 1) gameFactors.battleCardActive = true;
     else gameFactors.battleCardActive = false;
+
+    // Decrease jack counter
+    if (gameFactors.jackActive) gameFactors.jackActive -= 1;
 
     _.forOwn(gameFactors, function(value, key) {
       if (value !== gameState[key] && value)
@@ -126,13 +129,11 @@ export function makePlayerMove(cards) {
 
     // gameState.nextTurn = 1;
 
-    //Decrease jack counter
-    if (gameState.jackActive) {
-      jackActive -= 1;
-      return;
-    }
-
-    if (!gameState.aceActive && !gameState.jackActive && newPlayerCards.length) {
+    if (
+      !gameState.aceActive &&
+      !gameFactors.jackActive &&
+      newPlayerCards.length
+    ) {
       dispatch(makeCpuMove());
       dispatch(checkMacaoAndWin());
     }
@@ -145,8 +146,10 @@ export function waitTurns(who) {
     const gameState = getState().gameState;
     if (gameState.waitTurn) {
       dispatch(updateGameFactor("waitTurn", 0));
-      dispatch({ type: "WAIT_TURNS", waitTurns: gameState.waitTurn - 1 });
-    } else dispatch({ type: "WAIT_TURNS", waitTurns: gameState[who].wait - 1 });
+      dispatch({ type: "WAIT_TURNS", waitTurns: gameState.waitTurn - 1, who });
+    } else {
+      dispatch({ type: "WAIT_TURNS", waitTurns: gameState[who].wait - 1, who });
+    }
   };
 }
 
@@ -161,7 +164,6 @@ export function addToPile(cards) {
 
 export function takeCards(who) {
   return function(dispatch, getState) {
-    debugger;
     const gameState = getState().gameState;
     let howMany = gameState.cardsToTake - 1;
     if (!howMany) howMany = 1;
@@ -211,7 +213,6 @@ export function updateGameFactor(factor, value) {
 
 export function updateCpuCards(cards) {
   return function(dispatch, getState) {
-    debugger;
     cards = cards.map(card => {
       card = _.omit(card, "sameTypeAmount");
       card = _.omit(card, "sameWeightAmount");
@@ -289,7 +290,7 @@ export function makeCpuMove() {
       playerWait = gameState.player.wait,
       playerCards = gameState.player.cards;
 
-    let { cpuWait } = gameState.cpuPlayer,
+    let cpuWait = gameState.cpuPlayer.wait,
       gameFactors = {
         cardsToTake,
         waitTurn,
@@ -323,9 +324,9 @@ export function makeCpuMove() {
         card => "jack" === card.type || card.type === gameFactors.chosenType
       );
     }
-    //IF CPU does have available cards
+    if (cpuWait) return noCardsToUse();
 
-    debugger;
+    //IF CPU does have available cards
 
     if (availableCards.length) {
       //console.log("cpu had available cards");
@@ -559,7 +560,7 @@ export function makeCpuMove() {
       }
 
       if (gameState.jackActive && weightPicked !== 4) {
-        gameFactors.jackActive = false;
+        gameFactors.jackActive -=1;
       }
 
       if (randomNumber === 0) {
@@ -599,7 +600,7 @@ export function makeCpuMove() {
             }
           }
         }
-        
+
         cpuSelectedCards.forEach(card => {
           let notCheckedYet = true;
           switch (card.type) {
@@ -674,7 +675,6 @@ export function makeCpuMove() {
         availableCards = [];
         dispatch(addToPile(cpuSelectedCards));
       }
-      debugger;
       newCpuCards = sortCards(newCpuCards);
       dispatch(updateCpuCards(newCpuCards));
       updateGameFactors();
@@ -702,7 +702,6 @@ export function makeCpuMove() {
       else gameFactors.battleCardActive = false;
 
       _.forOwn(gameFactors, function(value, key) {
-        debugger;
         if (value !== gameState[key]) dispatch(updateGameFactor(key, value));
       });
     }
