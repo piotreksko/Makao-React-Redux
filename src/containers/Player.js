@@ -1,22 +1,15 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import * as logicActions from "../actions/logicActions";
-import ActionButtons from "../components/buttons/ActionButtons";
-import ActionModals from "../components/modals/ActionModals";
+import _ from "lodash";
 import Aux from "../hoc/Auxilliary";
-import CpuPlayer from "../components/CpuPlayer";
-import Deck from "../components/Deck";
-import Header from "../components/Header";
-import Pile from "../components/Pile";
-import Player from "../components/Player";
-import BattleIcon from "../components/icons/BattleIcon";
-import DemandIcon from "../components/icons/DemandIcon";
-import SuitIcon from "../components/icons/SuitIcon";
-import WaitIcon from "../components/icons/WaitIcon";
-import Confetti from "react-dom-confetti";
-var _ = require("lodash");
 
-export class GameLogic extends Component {
+import * as logicActions from "../actions/logicActions";
+import * as soundActions from "../actions/soundsActions";
+import ActionButtons from "../components/buttons/ActionButtons";
+import Card from "../components/cards/Card";
+import WaitIcon from "../components/icons/WaitIcon";
+
+class Player extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -24,24 +17,9 @@ export class GameLogic extends Component {
       possibleCards: [],
       selectedCards: []
     };
-
-    this.clickOwnCard = this.clickOwnCard.bind(this);
-    this.confirmCards = this.confirmCards.bind(this);
-    this.takeCards = this.takeCards.bind(this);
-    this.waitTurns = this.waitTurns.bind(this);
-    this.changeSuit = this.changeSuit.bind(this);
-    this.demandCard = this.demandCard.bind(this);
-    this.restartGame = this.restartGame.bind(this);
   }
 
   componentWillMount() {
-    setTimeout(() => {
-      this.props.showModal("whoStarts");
-    }, 1);
-    setTimeout(() => {
-      this.props.hideModal("whoStarts");
-    }, 1000);
-
     if (this.props.gameState.playerTurn)
       setTimeout(() => {
         this.checkAvailableCards(this.props.gameState, this.state);
@@ -51,17 +29,6 @@ export class GameLogic extends Component {
         this.props.endTurn();
       }, 1200);
   }
-
-  // shouldComponentUpdate(nextProps, nextState) {
-  //   if (
-  //     !_.isEqual(nextState, this.state) ||
-  //     nextProps.gameState.nextTurn !== this.props.gameState.nextTurn ||
-  //     !_.isEqual(nextProps.modals, this.props.modals)
-  //   )
-  //     return true;
-
-  //   return false;
-  // }
 
   componentDidUpdate(prevProps, prevState) {
     if (
@@ -75,7 +42,14 @@ export class GameLogic extends Component {
       this.checkAvailableCards(this.props.gameState, this.state);
   }
 
-  clickOwnCard(card, index) {
+  waitTurns = () => {
+    this.props.playerWait();
+    this.props.endTurn();
+  };
+
+  clickOwnCard = (card, index) => {
+    debugger;
+    // this.props.playSound.pickCard();
     let newSelected = _.cloneDeep(this.state.selectedCards);
     if (!card.class) return;
 
@@ -127,9 +101,9 @@ export class GameLogic extends Component {
       ...this.state,
       selectedCards: newSelected
     });
-  }
+  };
 
-  confirmCards() {
+  confirmCards = () => {
     if (!this.state.selectedCards.length) return;
     const { makePlayerMove } = this.props;
     makePlayerMove(this.state.selectedCards);
@@ -137,35 +111,7 @@ export class GameLogic extends Component {
       ...this.state,
       selectedCards: []
     });
-  }
-
-  takeCards() {
-    this.props.takeCards(this.props.gameState.cardsToTake);
-    this.props.endTurn();
-  }
-
-  waitTurns() {
-    this.props.playerWait();
-    this.props.endTurn();
-  }
-
-  restartGame() {
-    this.props.restartGame();
-    this.props.hideModal("gameOver");
-  }
-
-  changeSuit(weight) {
-    this.props.updateGameFactor("chosenWeight", weight);
-    this.props.hideModal("ace");
-    this.props.endTurn();
-  }
-
-  demandCard(type) {
-    this.props.updateGameFactor("chosenType", type);
-    if (type === "") this.props.updateGameFactor("jackActive", 0);
-    this.props.hideModal("jack");
-    this.props.endTurn();
-  }
+  };
 
   checkAvailableCards(gameState, groupedCards) {
     const {
@@ -289,82 +235,110 @@ export class GameLogic extends Component {
     }
   }
 
+  stylePlayerCards(playerCards, availableCards, possibleCards, selectedCards) {
+    let cards = _.cloneDeep(playerCards);
+
+    if (!cards) return;
+    if (
+      !availableCards.length &&
+      !selectedCards.length &&
+      !possibleCards.length
+    )
+      return playerCards;
+
+    const topCard = selectedCards.length
+      ? selectedCards[selectedCards.length - 1]
+      : null;
+
+    const styleTopCard = cards => {
+      if (!topCard) return;
+      return cards.forEach(function(card, i) {
+        if (topCard.type === card.type && topCard.weight === card.weight)
+          card.class = "topCard";
+      });
+    };
+
+    const styleAvailableCards = cards => {
+      return cards.forEach(card => {
+        availableCards.forEach(availableCard => {
+          if (
+            availableCard.type === card.type &&
+            availableCard.weight === card.weight
+          )
+            card.class = "available";
+        });
+      });
+    };
+
+    const stylePossibleCards = cards => {
+      return cards.forEach(card => {
+        possibleCards.forEach(possibleCard => {
+          if (
+            possibleCard.type === card.type &&
+            possibleCard.weight === card.weight
+          )
+            card.class = "possible";
+        });
+      });
+    };
+
+    const styleSelectedCards = () => {
+      return cards.forEach(card => {
+        selectedCards.forEach(selectedCard => {
+          if (
+            selectedCard.type === card.type &&
+            selectedCard.weight === card.weight
+          )
+            card.isSelected = true;
+        });
+      });
+    };
+
+    stylePossibleCards(cards);
+    styleAvailableCards(cards);
+    styleTopCard(cards);
+    styleSelectedCards(cards);
+
+    return cards;
+  }
+
+  checkClass(card) {
+    if (card.isSelected) {
+      card.class += " selected";
+    }
+    return card.class ? card.class : "";
+  }
+
   render() {
     const gameState = this.props.gameState,
+      playerCards = gameState.player.cards,
       pileTopCard = gameState.pile[gameState.pile.length - 1],
       playerCanWait =
         (pileTopCard.type === "4" && gameState.waitTurn) ||
         gameState.player.wait
           ? true
-          : false,
-      playerCanMove =
-        (!gameState.player.wait ||
-          (pileTopCard.type === "4" && !gameState.cpuPlayer.wait)) &&
-        !playerCanWait,
-      playerWon = !gameState.player.cards.length ? true : false;
-    const config = {
-      angle: 90,
-      spread: 100,
-      startVelocity: 50,
-      elementCount: 100,
-      decay: 0.9
-    };
-
+          : false;
     return (
       <Aux>
-        <ActionModals
-          show={this.props.modals}
-          changeSuit={this.changeSuit}
-          demandCard={this.demandCard}
-          playerTurn={gameState.playerTurn}
-          playerWon={playerWon}
-          cpuPlayerMacao={gameState.cpuPlayer.cards.length === 1}
-          playerMacao={gameState.player.cards.length === 1}
-          restartGame={this.restartGame}
-        />
-        <div className="confetti">
-          <Confetti
-            active={!this.props.gameState.player.cards.length}
-            config={config}
-          />
+        <div className={"flex-container cards-container"}>
+          <div className={"row cards"}>
+            {this.stylePlayerCards(
+              playerCards,
+              this.state.availableCards,
+              this.state.possibleCards,
+              this.state.selectedCards
+            ).map((card, index) => (
+              <Card
+                key={index}
+                clickOwnCard={this.clickOwnCard}
+                card={card}
+                index={index}
+                cardClass={this.checkClass(card) + " cardsInHand"}
+              />
+            ))}
+          </div>
+          <WaitIcon waitTurn={this.props.gameState.player.wait} />
         </div>
-        <Header />
-        <CpuPlayer cpuPlayer={gameState.cpuPlayer} />
-        <div className="flex-container">
-          <Deck takeCard={this.takeCards} playerCanMove={playerCanMove} />
-          <Pile cardOnTop={pileTopCard} />
-          <BattleIcon
-            battleCards={gameState.cardsToTake}
-            gameOver={gameState.gameOver}
-          />
-          <DemandIcon
-            jackActive={gameState.jackActive && !this.props.modals.jack}
-            chosenType={gameState.chosenType}
-            gameOver={gameState.gameOver}
-          />
-          <SuitIcon
-            show={
-              gameState.pile[gameState.pile.length - 1].type === "ace" &&
-              !this.props.modals.ace
-            }
-            chosenWeight={gameState.chosenWeight}
-            gameOver={gameState.gameOver}
-          />
-          <WaitIcon
-            waitTurn={gameState.waitTurn}
-            gameOver={gameState.gameOver}
-            playerIcon={true}
-          />
-        </div>
-        <Player
-          clickOwnCard={this.clickOwnCard}
-          player={gameState.player}
-          groupedCards={{
-            availableCards: this.state.availableCards,
-            possibleCards: this.state.possibleCards,
-            selectedCards: this.state.selectedCards
-          }}
-        />
         <ActionButtons
           confirmCards={this.confirmCards}
           hasSelected={this.state.selectedCards.length}
@@ -378,9 +352,6 @@ export class GameLogic extends Component {
 
 const mapStateToProps = state => {
   return {
-    globalStats: state.stats.global,
-    currentStats: state.stats.current,
-    modals: state.modals,
     gameState: state.gameState
   };
 };
@@ -388,22 +359,21 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return {
     makePlayerMove: cards => dispatch(logicActions.makePlayerMove(cards)),
-    showModal: modal => dispatch({ type: "SHOW_MODAL", modal: modal }),
-    hideModal: modal => dispatch({ type: "HIDE_MODAL", modal: modal }),
     playerWait: () => dispatch(logicActions.waitTurns("player")),
-    takeCards: howMany => dispatch(logicActions.takeCards("player")),
-    updateGameFactor: (factor, value) =>
-      dispatch(logicActions.updateGameFactor(factor, value)),
     endTurn: () => {
       dispatch(logicActions.updateGameFactor("playerTurn", false));
       dispatch(logicActions.makeCpuMove());
       dispatch(logicActions.checkMacaoAndWin());
     },
-    restartGame: () => dispatch({ type: logicActions.RESTART_GAME })
+    playSound: {
+      pickCard: () => {
+        dispatch(soundActions.pickCard());
+      }
+    }
   };
 };
 
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(GameLogic);
+)(Player);
