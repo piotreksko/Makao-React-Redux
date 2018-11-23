@@ -1,10 +1,19 @@
 # Makao - React/Redux
 
 My favorite cards game - Makao. 
-WORK in progress - playable, not all features have been rewritten yet
+WORK in progress
+
+### Things to do:
+
+* Working stats tracking
+* Animations
+* Sound effects
+* Tests
+* AI algorithm
+* More features e.g. more AI players
 
 Original version - https://github.com/piotreksko/Makao
-## [Live Demo](https://makao-win-counter.firebaseapp.com/)
+## [Live Demo of Original version](https://makao-win-counter.firebaseapp.com/)
 
 ![Demo](demo.gif)
 
@@ -73,9 +82,3 @@ Computer gets a random number between 1 and 83 - it get's 57.
 * If an Ace is played, the player playing the Ace can call a suit suit of choice.
 
 Multiples action cards can be played, i.e. Player 1 plays three 2s and the next player in sequence must pick up 6 cards unless they have another 2. This is the same for 3's, 4's and Kings.
-
-### Things to improve:
-
-* AI algorithm
-* More features e.g. more AI players
-* Convert to another framework.
