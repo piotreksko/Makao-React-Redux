@@ -12,7 +12,7 @@ WORK in progress
 * AI algorithm
 * More features e.g. more AI players
 
-Original version - https://github.com/piotreksko/Makao
+Reweritten from a jQuery version - https://github.com/piotreksko/Makao
 ## [Live Demo of Original version](https://makao-win-counter.firebaseapp.com/)
 
 ![Demo](demo.gif)
