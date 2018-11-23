@@ -1,4 +1,4 @@
-// import firebase from "firebase";
+import _ from 'lodash';
 import { sortCards } from "../utility/utility";
 export const UPDATE_PLAYER_CARDS = "UPDATE_PLAYER_CARDS";
 export const TAKE_FROM_DECK = "TAKE_FROM_DECK";
@@ -11,33 +11,6 @@ export const CHANGE_SUIT = "CHANGE_SUIT";
 export const DEMAND_CARD = "DEMAND_CARD";
 export const SHUFFLE_DECK = "SHUFFLE_DECK";
 export const RESTART_GAME = "RESTART_GAME";
-var _ = require("lodash");
-// const ref = firebase.database().ref("/winCounter");
-
-export const fetchGlobalStats = () => dispatch => {
-  //   ref.on("value", snapshot => {
-  //     const stats = {
-  //       totalComputerWinCount: "",
-  //       totalPlayerWinCount: "",
-  //       totalMovesCount: "",
-  //       macaoCallCount: ""
-  //     };
-  //     this.totalComputerWinCount = snapshot.val().computerWinCount;
-  //     this.totalPlayerWinCount = snapshot.val().playerWinCount;
-  //     //Only overwrite at the game start - dont overwrite from realtime database updates
-  //     if (this.totalMovesCount === 0) {
-  //       this.totalMovesCount = snapshot.val().totalMovesCount;
-  //     }
-  //     if (this.macaoCallCount === 0) {
-  //       this.macaoCallCount = snapshot.val().macaoCallCount;
-  //     }
-  //     dispatch({
-  //       type: FETCH_STATS,
-  //       payload: stats
-  //     });
-  //     this.setTotalCounters();
-  //   });
-};
 
 export function makePlayerMove(cards) {
   return function(dispatch, getState) {
@@ -274,6 +247,10 @@ export function checkMacaoAndWin() {
   };
 }
 
+// OLD CODE TO REFACTOR
+//          |
+//          |
+//          v 
 export function makeCpuMove() {
   return function(dispatch, getState) {
     const { gameState } = getState(),

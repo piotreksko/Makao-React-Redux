@@ -14,7 +14,7 @@ import {
 } from "../actions/logicActions";
 import { cardTypes, cardWeights } from "../constants/constants";
 import { sortCards } from "../utility/utility";
-var _ = require("lodash");
+import _ from "lodash";
 
 const initialState = () => {
   let initGame = {
