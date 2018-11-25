@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import * as logicActions from "../actions/logicActions";
+import * as soundActions from "../actions/soundsActions";
 import Modals from "./Modals";
 import Aux from "../hoc/Auxilliary";
 import CpuPlayer from "../components/CpuPlayer";
@@ -30,6 +31,7 @@ export class GameView extends Component {
 
   takeCards() {
     this.props.takeCards(this.props.gameState.cardsToTake);
+    this.props.playSound.takeCard();
     this.props.endTurn();
   }
 
@@ -102,7 +104,12 @@ const mapDispatchToProps = dispatch => {
       dispatch(logicActions.makeCpuMove());
       dispatch(logicActions.checkMacaoAndWin());
     },
-    restartGame: () => dispatch({ type: logicActions.RESTART_GAME })
+    restartGame: () => dispatch({ type: logicActions.RESTART_GAME }),
+    playSound: {
+      takeCard: () => {
+        dispatch(soundActions.takeCard());
+      }
+    }
   };
 };
 

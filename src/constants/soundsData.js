@@ -1,16 +1,31 @@
+import ace from '../sounds/ace.mp3';
+import battle from '../sounds/battle.mp3';
+import click from '../sounds/click.mp3';
+import defeat from '../sounds/defeat.mp3';
+import jack from '../sounds/jack.mp3';
+import pick_card1 from '../sounds/pick_card1.mp3';
+import pick_card2 from '../sounds/pick_card2.mp3';
+import pick_card3 from '../sounds/pick_card3.mp3';
+import shuffle from '../sounds/shuffle.mp3';
+import take_card from '../sounds/take_card.mp3';
+import throw_cards from '../sounds/throw_cards.mp3';
+import turn_card from '../sounds/turn_card.mp3';
+import victory from '../sounds/victory.mp3';
+import wait from '../sounds/wait.mp3';
+
 export const soundsData = {
-    ace: '../sounds/ace.mp3',
-    battle: '../sounds/battle.mp3',
-    card_pick1: '../sounds/card_pick1.mp3',
-    card_pick2: '../sounds/card_pick2.mp3',
-    card_pick3: '../sounds/card_pick3.mp3',
-    click: '../sounds/click.mp3',
-    defeat: '../sounds/defeat.mp3',
-    jack: '../sounds/jack.mp3',
-    pick_card: ['../sounds/pick_card.mp3'],
-    shuffle: '../sounds/shuffle.mp3',
-    throw_cards: '../sounds/throw_cards.mp3',
-    turn_card: '../sounds/turn_card.mp3',
-    victory: '../sounds/victory.mp3',
-    wait: '../sounds/wait.mp3'
+    ace,
+    battle,
+    click,
+    defeat, 
+    jack,
+    pick_card1,
+    pick_card2,
+    pick_card3,
+    shuffle,
+    take_card,
+    throw_cards,
+    turn_card,
+    victory,
+    wait
   }
