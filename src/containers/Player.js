@@ -48,26 +48,33 @@ class Player extends Component {
   };
 
   clickOwnCard = (card, index) => {
-    debugger;
     if (!card.class) return;
     let newSelected = _.cloneDeep(this.state.selectedCards);
-    // this.props.playSound.pickCard();
+    
+    const randomSoundNumber = Math.floor(Math.random() * 3) + 1  
+    console.log(randomSoundNumber);
+    this.props.playSound.pickCard(`pick_card${randomSoundNumber}`);
 
-    let player = this.props.gameState.player;
+    let playerCards = this.props.gameState.player.cards;
+
+    const updateSelectedCards = () => {
+      this.setState({
+        ...this.state,
+        selectedCards: newSelected
+      });
+    };
+
     if (!newSelected.length) {
       newSelected.push(card);
-      return this.setState({
-        ...this.state,
-        selectedCards: [...this.state.selectedCards, card]
-      });
+      updateSelectedCards();
     }
 
     const removeFromSelected = () => {
       for (let i = 0; i < newSelected.length; i++) {
         //Find index of the card to remove from selected
         if (
-          newSelected[i].type === player.cards[index].type &&
-          newSelected[i].weight === player.cards[index].weight
+          newSelected[i].type === playerCards[index].type &&
+          newSelected[i].weight === playerCards[index].weight
         ) {
           newSelected.splice(i, 1);
           if (i === 0) {
@@ -79,10 +86,7 @@ class Player extends Component {
 
     if (card.class.includes("selected")) {
       removeFromSelected();
-      return this.setState({
-        ...this.state,
-        selectedCards: newSelected
-      });
+      return updateSelectedCards();
     }
 
     switch (card.class) {
@@ -91,16 +95,12 @@ class Player extends Component {
         break;
       case "available":
         newSelected = [];
-        newSelected.push(player.cards[index]);
+        newSelected.push(playerCards[index]);
         break;
       default:
         return newSelected;
     }
-
-    this.setState({
-      ...this.state,
-      selectedCards: newSelected
-    });
+    updateSelectedCards();
   };
 
   confirmCards = () => {
@@ -119,119 +119,14 @@ class Player extends Component {
 
     if (playerWait) return;
 
-    // No cards have been chosen
     if (!selectedCards.length) {
       this.hasNoSelectedCards();
-      /*
-      cards.forEach((card, idx) => {
-
-        if (battleCardActive) {
-
-          // Card of same type is available
-          if (
-            card.type === pileTopCard.type ||
-
-            // Cards of same weight + it's a 2 or 3
-            (card.weight === pileTopCard.weight &&
-              (card.type === "2" || card.type === "3")) ||
-
-            // Available kings - spades and hearts
-            (card.type === "king" &&
-              card.weight === pileTopCard.weight &&
-              (card.weight === "spades" || card.weight === "hearts")) ||
-
-            // If last card was a king, make king of diamond and clubs available
-            (card === pileTopCard.type &&
-              (card.weight === "diamond" || card.weight === "clubs"))
-          ) {
-            newAvailable.push(cards[idx]);
-          }
-          return;
-        }
-
-        // Make 4 available if it was used
-        if (waitTurn) {
-          if (card.type === "4") newAvailable.push(cards[idx]);
-          return;
-        }
-
-        // Jack demand is active
-        if (jackActive) {
-          if (
-            card.type === chosenType ||
-            (card.type === "jack" && pileTopCard.type === "jack")
-          )
-            newAvailable.push(cards[idx]);
-          return;
-        }
-
-        // No special conditions
-        if (card.type === pileTopCard.type) {
-          newAvailable.push(cards[idx]);
-        }
-        if (
-          card.weight === pileTopCard.weight &&
-          card.type !== pileTopCard.type
-        ) {
-          newAvailable.push(cards[idx]);
-        }
-      });
-      this.setState({
-        ...this.state,
-        availableCards: newAvailable,
-        possibleCards: newPossible
-      });
-    */
     } else if (selectedCards.length) {
-      debugger;
       this.hasSelectedCards();
-      /*
-      let chosenCard = selectedCards[0];
-
-      // Adjust available cards according to chosen card
-      cards.forEach((card, idx) => {
-        // Get cards with the same type as chosen card - possible card addition
-        if (card.type === chosenCard.type) {
-          newPossible.push(cards[idx]);
-          return;
-        }
-
-        // If type or weight is the same last card and jack is not active
-        if (
-          card.type === pileTopCard.type ||
-          (card.weight === pileTopCard.weight &&
-            card.type !== chosenCard.type &&
-            !battleCardActive &&
-            !jackActive)
-        ) {
-          // And is not in availableCards yet
-          newAvailable.push(cards[idx]);
-          return;
-        }
-
-        // Make jack available if it was used
-        if (card.type === "jack" && jackActive && !waitTurn) {
-          newAvailable.push(cards[idx]);
-          return;
-        }
-        // Make 4 possible if it was used
-        if (card.type === "4" && !jackActive && waitTurn) {
-          newAvailable.push(cards[idx]);
-          return;
-        }
-      });
-      this.setState({
-        ...this.state,
-        availableCards: newAvailable,
-        possibleCards: newPossible
-      });
     }
-    */
-    }
-  }
+  };
 
   hasNoSelectedCards = () => {
-    const gameState = this.props.gameState;
     const {
       player,
       chosenWeight,
@@ -239,33 +134,30 @@ class Player extends Component {
       waitTurn,
       jackActive,
       battleCardActive,
-    } = gameState;
+      pile
+    } = this.props.gameState;
     debugger;
     const playerCards = player.cards;
 
-    let pileTopCard = gameState.pile[gameState.pile.length - 1],
+    let pileTopCard = pile[pile.length - 1],
       newAvailable = [],
       newPossible = [];
 
     if (pileTopCard.type === "ace") {
-      const lastCardAfterAce = {
-        type: "ace",
-        weight: chosenWeight
-      };
-      pileTopCard = Object.assign({}, lastCardAfterAce);
+      pileTopCard.weight = chosenWeight;
     }
 
     playerCards.forEach((card, idx) => {
-
       // Make battle cards available if battle is on
       if (battleCardActive) {
-        return newAvailable.concat(this.getBattleCards(card, idx, playerCards, pileTopCard));
+        return newAvailable.concat(
+          this.getBattleCards(card, idx, playerCards, pileTopCard)
+        );
       }
 
       // Make 4 available if it was used
       if (waitTurn) {
-        if (card.type === "4") newAvailable.push(playerCards[idx]);
-        return;
+        if (card.type === "4") return newAvailable.push(playerCards[idx]);
       }
 
       // Jack demand is active
@@ -274,8 +166,7 @@ class Player extends Component {
           card.type === chosenType ||
           (card.type === "jack" && pileTopCard.type === "jack")
         )
-          newAvailable.push(playerCards[idx]);
-        return;
+          return newAvailable.push(playerCards[idx]);
       }
 
       // No special conditions
@@ -289,90 +180,102 @@ class Player extends Component {
         newAvailable.push(playerCards[idx]);
       }
     });
-    this.setState({
-      ...this.state,
-      availableCards: newAvailable,
-      possibleCards: newPossible
-    });
-  }
+    this.updatePlayerCards(newAvailable, newPossible);
+  };
 
   getBattleCards = (card, idx, playerCards, pileTopCard, newAvailable = []) => {
-
-    // Card of same type is available
+    // Battle cards are 2, 3, king of spades and hearts
     if (
       card.type === pileTopCard.type ||
-
-      // Cards of same weight + it's a 2 or 3
+      // 2 or 3
       (card.weight === pileTopCard.weight &&
         (card.type === "2" || card.type === "3")) ||
-
-      // Available kings - spades and hearts
+      // Kings - spades and hearts
       (card.type === "king" &&
         card.weight === pileTopCard.weight &&
         (card.weight === "spades" || card.weight === "hearts")) ||
-
-      // If last card was a king, make king of diamond and clubs available
+      // If last card was a battle king, make king of diamond and clubs available
       (card === pileTopCard.type &&
         (card.weight === "diamond" || card.weight === "clubs"))
     ) {
       newAvailable.push(playerCards[idx]);
     }
     return newAvailable;
-  }
+  };
 
   hasSelectedCards() {
-    const gameState = this.props.gameState;
     const {
       player,
       waitTurn,
       chosenWeight,
       jackActive,
-      battleCardActive
-    } = gameState;
+      battleCardActive,
+      pile
+    } = this.props.gameState;
     const playerCards = player.cards;
 
-    let pileTopCard = gameState.pile[gameState.pile.length - 1],
+    let pileTopCard = pile[pile.length - 1],
       newAvailable = [],
       newPossible = [];
 
     if (pileTopCard.type === "ace") {
-      const lastCardAfterAce = {
-        type: "ace",
-        weight: chosenWeight
-      };
-      pileTopCard = Object.assign({}, lastCardAfterAce);
+      pileTopCard.weight = chosenWeight;
     }
 
     let chosenCard = this.state.selectedCards[0];
 
     // Adjust available cards according to chosen card
     playerCards.forEach((card, idx) => {
-      // Get cards with the same type as chosen card - possible card addition
+      // Get cards with the same type as chosen card (possibleCards)
       if (card.type === chosenCard.type) {
         return newPossible.push(playerCards[idx]);
       }
 
-      // If type or weight is the same last card and jack is not active
       if (
-        card.type === pileTopCard.type ||
-        (card.weight === pileTopCard.weight &&
-          card.type !== chosenCard.type &&
-          !battleCardActive &&
-          !jackActive)
-      ) {
-        // And is not in availableCards yet
+        this.sameType(card, pileTopCard) ||
+        this.sameWeightNoConditions(
+          card,
+          pileTopCard,
+          battleCardActive,
+          jackActive,
+          waitTurn
+        ) ||
+        this.jackWasUsed(card, jackActive) ||
+        this.fourWasUsed(card, waitTurn)
+      )
         return newAvailable.push(playerCards[idx]);
-      }
-
-      // Make jack available if it was used
-      if (card.type === "jack" && jackActive && !waitTurn) {
-        return newAvailable.push(playerCards[idx]);
-      }
-      // Make 4 possible if it was used
-      if (card.type === "4" && !jackActive && waitTurn) {
-        return newAvailable.push(playerCards[idx]);
-      }
     });
+    this.updatePlayerCards(newAvailable, newPossible);
+  }
+
+  sameType(card, pileTopCard) {
+    return card.type === pileTopCard.type;
+  }
+
+  sameWeightNoConditions(
+    card,
+    pileTopCard,
+    battleCardActive,
+    jackActive,
+    waitTurn
+  ) {
+    return (
+      card.weight === pileTopCard.weight &&
+      !battleCardActive &&
+      !jackActive &&
+      !waitTurn
+    );
+  }
+
+  jackWasUsed(card, jackActive) {
+    return card.type === "jack" && jackActive;
+  }
+
+  fourWasUsed(card, waitTurn) {
+    return card.type === "4" && waitTurn;
+  }
+
+  updatePlayerCards(newAvailable, newPossible) {
     this.setState({
       ...this.state,
       availableCards: newAvailable,
@@ -397,7 +300,7 @@ class Player extends Component {
       if (!topCard) return;
       return cards.forEach(function(card, i) {
         if (topCard.type === card.type && topCard.weight === card.weight)
-          card.class = "topCard";
+          card.class += " topCard";
       });
     };
 
@@ -408,12 +311,7 @@ class Player extends Component {
             styledCard.type === card.type &&
             styledCard.weight === card.weight
           ) {
-            if (!card.class) {
-              card.class = "";
-            }
-            !card.class
-              ? (card.class = styleType)
-              : (card.class += ` ${styleType}`);
+            card.class = styleType;
           }
         });
       });
@@ -421,8 +319,8 @@ class Player extends Component {
 
     styleCards("possible", possibleCards, cards);
     styleCards("available", availableCards, cards);
-    styleTopCard(cards);
     styleCards("selected", selectedCards, cards);
+    styleTopCard(cards);
 
     return cards;
   }
@@ -491,8 +389,8 @@ const mapDispatchToProps = dispatch => {
       dispatch(logicActions.checkMacaoAndWin());
     },
     playSound: {
-      pickCard: () => {
-        dispatch(soundActions.pickCard());
+      pickCard: (sound) => {
+        dispatch(soundActions.pickCard(sound));
       }
     }
   };
