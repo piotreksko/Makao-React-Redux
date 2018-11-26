@@ -1,5 +1,6 @@
-import _ from 'lodash';
+import _ from "lodash";
 import { sortCards } from "../utility/utility";
+import { checkSoundsToPlay, playSound } from "./soundActions";
 export const UPDATE_PLAYER_CARDS = "UPDATE_PLAYER_CARDS";
 export const TAKE_FROM_DECK = "TAKE_FROM_DECK";
 export const ADD_TO_PILE = "ADD_TO_PILE";
@@ -143,6 +144,7 @@ export function takeCards(who) {
 
     let deck = gameState.deck;
     if (deck.length < howMany) {
+      dispatch(playSound("shuffle"));
       dispatch(shuffleDeck);
       deck = getState().gameState.deck;
     }
@@ -176,6 +178,7 @@ export function updatePlayerCards(cards) {
 
 export function updateGameFactor(factor, value) {
   return dispatch => {
+    dispatch(checkSoundsToPlay(factor, value));
     dispatch({
       type: "UPDATE_GAME_FACTOR",
       factor,
@@ -250,7 +253,7 @@ export function checkMacaoAndWin() {
 // OLD CODE TO REFACTOR
 //          |
 //          |
-//          v 
+//          v
 export function makeCpuMove() {
   return function(dispatch, getState) {
     const { gameState } = getState(),
@@ -537,7 +540,7 @@ export function makeCpuMove() {
       }
 
       if (gameState.jackActive && weightPicked !== 4) {
-        gameFactors.jackActive -=1;
+        gameFactors.jackActive -= 1;
       }
 
       if (randomNumber === 0) {
@@ -679,7 +682,9 @@ export function makeCpuMove() {
       else gameFactors.battleCardActive = false;
 
       _.forOwn(gameFactors, function(value, key) {
-        if (value !== gameState[key]) dispatch(updateGameFactor(key, value));
+        if (value !== gameState[key]) {
+          dispatch(updateGameFactor(key, value));
+        }
       });
     }
 

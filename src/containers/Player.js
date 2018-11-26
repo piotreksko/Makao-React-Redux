@@ -4,7 +4,7 @@ import _ from "lodash";
 import Aux from "../hoc/Auxilliary";
 
 import * as logicActions from "../actions/logicActions";
-import * as soundActions from "../actions/soundsActions";
+import * as soundActions from "../actions/soundActions";
 import ActionButtons from "../components/buttons/ActionButtons";
 import Card from "../components/cards/Card";
 import WaitIcon from "../components/icons/WaitIcon";
@@ -50,10 +50,9 @@ class Player extends Component {
   clickOwnCard = (card, index) => {
     if (!card.class) return;
     let newSelected = _.cloneDeep(this.state.selectedCards);
-    
-    const randomSoundNumber = Math.floor(Math.random() * 3) + 1  
-    console.log(randomSoundNumber);
-    this.props.playSound.pickCard(`pick_card${randomSoundNumber}`);
+
+    const randomSoundNumber = Math.floor(Math.random() * 3) + 1;
+    this.props.playSound(`pick_card${randomSoundNumber}`);
 
     let playerCards = this.props.gameState.player.cards;
 
@@ -105,6 +104,7 @@ class Player extends Component {
 
   confirmCards = () => {
     if (!this.state.selectedCards.length) return;
+    this.props.playSound('click')
     const { makePlayerMove } = this.props;
     makePlayerMove(this.state.selectedCards);
     this.setState({
@@ -136,7 +136,6 @@ class Player extends Component {
       battleCardActive,
       pile
     } = this.props.gameState;
-    debugger;
     const playerCards = player.cards;
 
     let pileTopCard = pile[pile.length - 1],
@@ -388,11 +387,7 @@ const mapDispatchToProps = dispatch => {
       dispatch(logicActions.makeCpuMove());
       dispatch(logicActions.checkMacaoAndWin());
     },
-    playSound: {
-      pickCard: (sound) => {
-        dispatch(soundActions.pickCard(sound));
-      }
-    }
+    playSound: soundName => dispatch(soundActions.playSound(soundName))
   };
 };
 

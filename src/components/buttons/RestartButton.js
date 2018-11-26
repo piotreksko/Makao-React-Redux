@@ -1,9 +1,8 @@
-import React, { Component } from "react";
+import React from "react";
 
-export default class RestartButton extends Component {
-  render() {
+export default function RestartButton (props) {
     return (
-      <button id="open-rules" className="rules-icon">
+      <button className="rules-icon" onClick={props.onClick}>
         <img
           alt="rules"
           className="icon-image"
@@ -11,5 +10,4 @@ export default class RestartButton extends Component {
         />
       </button>
     );
-  }
 }

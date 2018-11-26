@@ -1,10 +1,13 @@
 import React, { Component } from "react";
-import RestartButton from "./buttons/RestartButton";
-import RulesButton from "./buttons/RulesButton";
-import RulesModal from "./modals/RulesModal";
+import { connect } from "react-redux";
+import * as logicActions from "../actions/logicActions";
+import * as soundActions from "../actions/soundActions";
+import RulesModal from "../components/modals/RulesModal";
+import RulesButton from "../components/buttons/RulesButton";
+import RestartButton from "../components/buttons/RestartButton";
 import ReactModal from "react-modal";
 
-export default class Header extends Component {
+export class Header extends Component {
   constructor(props) {
     super(props);
 
@@ -14,14 +17,15 @@ export default class Header extends Component {
   }
 
   toggleRules = () => {
-    console.log(this);
+    this.props.playSound('click');
     this.setState({
       openRules: !this.state.openRules
     });
   };
 
   restartGame = () => {
-    // To be done
+    this.props.playSound('click');
+    this.props.restartGame();
   };
 
   render() {
@@ -78,3 +82,26 @@ export default class Header extends Component {
     );
   }
 }
+
+
+
+const mapStateToProps = state => {
+  return {
+    globalStats: state.stats.global,
+    currentStats: state.stats.current,
+    modals: state.modals,
+    gameState: state.gameState
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    restartGame: () => dispatch({ type: logicActions.RESTART_GAME }),
+    playSound: soundName => dispatch(soundActions.playSound(soundName))
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Header);

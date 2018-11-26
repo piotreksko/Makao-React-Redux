@@ -43,7 +43,7 @@ class CpuPlayer extends Component {
 CpuPlayer.propTypes = {
   cpuPlayer: PropTypes.shape({
     cards: PropTypes.array,
-    wait: PropTypes.bool
+    wait: PropTypes.number
   })
 };
 

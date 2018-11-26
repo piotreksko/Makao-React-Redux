@@ -1,16 +1,16 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import * as logicActions from "../actions/logicActions";
-import * as soundActions from "../actions/soundsActions";
-import Modals from "./Modals";
+import * as soundActions from "../actions/soundActions";
 import Aux from "../hoc/Auxilliary";
-import CpuPlayer from "../components/CpuPlayer";
-import Deck from "../components/Deck";
-import Header from "../components/Header";
-import Pile from "../components/Pile";
+import Modals from "./Modals";
+import Header from "./Header";
 import Player from "./Player";
-import Icons from './Icons';
+import Icons from "./Icons";
+import Deck from "../components/Deck";
+import Pile from "../components/Pile";
 import Confetti from "react-dom-confetti";
+import CpuPlayer from "../components/CpuPlayer";
 
 export class GameView extends Component {
   constructor(props) {
@@ -31,7 +31,7 @@ export class GameView extends Component {
 
   takeCards() {
     this.props.takeCards(this.props.gameState.cardsToTake);
-    this.props.playSound.takeCard();
+    this.props.playSound('take_card');
     this.props.endTurn();
   }
 
@@ -105,11 +105,7 @@ const mapDispatchToProps = dispatch => {
       dispatch(logicActions.checkMacaoAndWin());
     },
     restartGame: () => dispatch({ type: logicActions.RESTART_GAME }),
-    playSound: {
-      takeCard: () => {
-        dispatch(soundActions.takeCard());
-      }
-    }
+    playSound: soundName => dispatch(soundActions.playSound(soundName))
   };
 };
 

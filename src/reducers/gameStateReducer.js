@@ -12,6 +12,7 @@ import {
   WAIT_TURNS,
   RESTART_GAME
 } from "../actions/logicActions";
+import * as soundActions from '../actions/soundActions';
 import { cardTypes, cardWeights } from "../constants/constants";
 import { sortCards } from "../utility/utility";
 import _ from "lodash";
@@ -19,12 +20,12 @@ import _ from "lodash";
 const initialState = () => {
   let initGame = {
     player: {
-      wait: false,
-      cards: []
+      cards: [],
+      wait: 0
     },
     cpuPlayer: {
       cards: [],
-      wait: false
+      wait: 0
     },
     pile: [],
     deck: [],

@@ -9,7 +9,6 @@ import pick_card3 from '../sounds/pick_card3.mp3';
 import shuffle from '../sounds/shuffle.mp3';
 import take_card from '../sounds/take_card.mp3';
 import throw_cards from '../sounds/throw_cards.mp3';
-import turn_card from '../sounds/turn_card.mp3';
 import victory from '../sounds/victory.mp3';
 import wait from '../sounds/wait.mp3';
 
@@ -25,7 +24,6 @@ export const soundsData = {
     shuffle,
     take_card,
     throw_cards,
-    turn_card,
     victory,
     wait
   }
