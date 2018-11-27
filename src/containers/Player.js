@@ -156,16 +156,12 @@ class Player extends Component {
 
       // Make 4 available if it was used
       if (waitTurn) {
-        if (card.type === "4") return newAvailable.push(playerCards[idx]);
+        return card.type === "4" ? newAvailable.push(playerCards[idx]) : null;
       }
 
       // Jack demand is active
       if (jackActive) {
-        if (
-          card.type === chosenType ||
-          (card.type === "jack" && pileTopCard.type === "jack")
-        )
-          return newAvailable.push(playerCards[idx]);
+        return card.type === chosenType || (card.type === 'jack' && pileTopCard.type === 'jack') ? newAvailable.push(playerCards[idx]) : null;
       }
 
       // No special conditions
