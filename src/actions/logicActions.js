@@ -2,10 +2,10 @@ import _ from "lodash";
 import { sortCards } from "../utility/utility";
 import { checkSoundsToPlay, playSound } from "./soundActions";
 export const UPDATE_PLAYER_CARDS = "UPDATE_PLAYER_CARDS";
+export const UPDATE_CPU_CARDS = "UPDATE_CPU_CARDS";
 export const TAKE_FROM_DECK = "TAKE_FROM_DECK";
 export const ADD_TO_PILE = "ADD_TO_PILE";
 export const UPDATE_GAME_FACTOR = "UPDATE_GAME_FACTOR";
-export const UPDATE_CPU_CARDS = "UPDATE_CPU_CARDS";
 export const WAIT_TURNS = "WAIT_TURNS";
 export const FETCH_STATS = "FETCH_STATS";
 export const CHANGE_SUIT = "CHANGE_SUIT";
@@ -13,26 +13,180 @@ export const DEMAND_CARD = "DEMAND_CARD";
 export const SHUFFLE_DECK = "SHUFFLE_DECK";
 export const RESTART_GAME = "RESTART_GAME";
 
+export function addToDeck(cards) {
+  return dispatch => {
+    dispatch({
+      type: "ADD_TO_DECK",
+      cards
+    });
+  };
+}
+
+export function newGame() {
+  return dispatch => {
+    dispatch({
+      type: "NEW_GAME"
+    });
+  };
+}
+
+export function updateGameFactor(factor, value) {
+  return dispatch => {
+    dispatch(checkSoundsToPlay(factor, value));
+    dispatch({
+      type: "UPDATE_GAME_FACTOR",
+      factor,
+      value
+    });
+  };
+}
+export function updatePlayerCards(cards) {
+  return dispatch => {
+    dispatch({ type: UPDATE_PLAYER_CARDS, cards });
+  };
+}
+
+export function updateCpuCards(cards) {
+  return dispatch => {
+    // Omit to clear them from unwanted properties before updating
+    cards = cards.map(card => {
+      card = _.omit(card, "sameTypeAmount");
+      card = _.omit(card, "sameWeightAmount");
+      return card;
+    });
+    dispatch({ type: UPDATE_CPU_CARDS, cards });
+  };
+}
+
+export function shuffleDeck() {
+  return function(dispatch, getState) {
+    const { pile } = getState().gameState;
+    let cardsForShuffle = _.cloneDeep(pile).pop();
+    let shuffledCards = _.shuffle(cardsForShuffle);
+    dispatch({
+      type: "SHUFFLED_CARDS",
+      cards: shuffledCards
+    });
+  };
+}
+
+export function waitTurns(who) {
+  return function(dispatch, getState) {
+    const gameState = getState().gameState;
+    if (gameState.waitTurn) {
+      dispatch(updateGameFactor("waitTurn", 0));
+      dispatch({ type: "WAIT_TURNS", waitTurns: gameState.waitTurn - 1, who });
+    } else {
+      dispatch({ type: "WAIT_TURNS", waitTurns: gameState[who].wait - 1, who });
+    }
+  };
+}
+
+export function addToPile(cards) {
+  return dispatch => {
+    dispatch({
+      type: "ADD_TO_PILE",
+      cards: cards
+    });
+  };
+}
+
+export function checkMacaoAndWin() {
+  return function(dispatch, getState) {
+    const gameState = getState().gameState;
+    checkMacao(gameState);
+    checkWin(gameState);
+  };
+}
+
+export function checkMacao(gameState) {
+  return dispatch => {
+    if (
+      gameState.player.cards.length === 1 ||
+      gameState.cpuPlayer.cards.length === 1
+    ) {
+      dispatch({ type: "SHOW_MODAL", modal: "macao" });
+      setTimeout(() => {
+        dispatch({ type: "HIDE_MODAL", modal: "macao" });
+      }, 1000);
+    }
+  };
+}
+
+export function checkWin(gameState) {
+  return dispatch => {
+    if (
+      gameState.player.cards.length === 0 ||
+      gameState.cpuPlayer.cards.length === 0
+    )
+      dispatch({ type: "SHOW_MODAL", modal: "gameOver" });
+  };
+}
+
+export function takeCards(who) {
+  return function(dispatch, getState) {
+    const gameState = getState().gameState;
+    let howMany = gameState.cardsToTake - 1;
+    if (!howMany) howMany = 1;
+
+    // Check if there are enough cards on deck
+    let deck = gameState.deck;
+    if (deck.length < howMany) {
+      dispatch(playSound("shuffle"));
+      dispatch(shuffleDeck);
+      deck = getState().gameState.deck;
+    }
+    dispatch({ type: "TAKE_FROM_DECK", howMany });
+
+    const cardsToTake = deck.slice(deck.length - howMany, deck.length);
+    let newCardsWithTakenCards = sortCards([
+      ...cardsToTake,
+      ..._.cloneDeep(gameState[who].cards)
+    ]);
+
+    if (who === "player") dispatch(updatePlayerCards(newCardsWithTakenCards));
+    else dispatch(updateCpuCards(newCardsWithTakenCards));
+
+    if (gameState.cardsToTake > 1) dispatch(updateGameFactor("cardsToTake", 1));
+    if (gameState.battleCardActive)
+      dispatch(updateGameFactor("battleCardActive", false));
+  };
+}
+
+function nobodyIsWaiting() {
+  return function(dispatch, getState) {
+    const gameState = getState().gameState;
+    return !gameState.player.wait && !gameState.cpuPlayer.wait;
+  };
+}
+
 export function makePlayerMove(cards) {
   return function(dispatch, getState) {
+    
+    // Clear cards from class key
+    cards = cards.map(card => (card = _.omit(card, "class")));
+
+    const newPlayerCards = verifyUsedCards(cards);
+
+    dispatch(addToPile(cards));
+    dispatch(updatePlayerCards(newPlayerCards));
+
+    const modals = getState().modals;
+
+    if (!modals.ace && !modals.jack) {
+      dispatch(makeCpuMove());
+      dispatch(checkMacaoAndWin());
+    }
+  };
+}
+
+function verifyUsedCards(cards) {
+  return function(dispatch, getState) {
     const { gameState } = getState();
-    const { player } = gameState;
     let { cardsToTake, waitTurn, jackActive, battleCardActive } = gameState;
     let gameFactors = { cardsToTake, waitTurn, jackActive, battleCardActive };
+    let newPlayerCards = _.cloneDeep(gameState.player.cards);
 
-    let newPlayerCards = _.cloneDeep(player.cards);
-    let aceActive, changeDemand;
-
-    const nobodyIsWaiting = () => {
-      return !player.wait && !gameState.cpuPlayer.wait;
-    };
-
-    // Clear cards from class key
-    cards = cards.map(card => {
-      return (card = _.omit(card, "class"));
-    });
-
-    // Battle cards - add cards to take accordingly
     cards.forEach(card => {
       switch (card.type) {
         case "2":
@@ -47,11 +201,11 @@ export function makePlayerMove(cards) {
           }
           break;
         case "jack":
+          dispatch({ type: "SHOW_MODAL", modal: "jack" });
           gameFactors.jackActive = 3;
-          changeDemand = 1;
           break;
         case "ace":
-          aceActive = 1;
+          dispatch({ type: "SHOW_MODAL", modal: "macao" });
           break;
         case "king":
           if (
@@ -78,182 +232,35 @@ export function makePlayerMove(cards) {
       newPlayerCards.splice(cardIndexInPlayerCards, 1);
     });
 
+    checkGameFactorsToUpdate(gameFactors);
+    return newPlayerCards;
+  };
+}
+
+function checkGameFactorsToUpdate(gameFactors) {
+  return function(dispatch, getState) {
+    const gameState = getState().gameState;
+
     if (gameFactors.cardsToTake > 1) gameFactors.battleCardActive = true;
     else gameFactors.battleCardActive = false;
 
-    // Decrease jack counter
     if (gameFactors.jackActive) gameFactors.jackActive -= 1;
 
     _.forOwn(gameFactors, function(value, key) {
       if (value !== gameState[key] && value)
         dispatch(updateGameFactor(key, value));
     });
-    dispatch(addToPile(cards));
-    dispatch(updatePlayerCards(newPlayerCards));
-
-    //Open a dialog box if ace or jack was used
-    if (aceActive) {
-      dispatch({ type: "SHOW_MODAL", modal: "ace" });
-      return;
-    }
-    if (gameFactors.jackActive && changeDemand && newPlayerCards.length) {
-      dispatch({ type: "SHOW_MODAL", modal: "jack" });
-      return;
-    }
-
-    // gameState.nextTurn = 1;
-
-    if (
-      !gameState.aceActive &&
-      !gameFactors.jackActive &&
-      newPlayerCards.length
-    ) {
-      dispatch(makeCpuMove());
-      dispatch(checkMacaoAndWin());
-    }
-    // If jack is active, but player did not use it this turn
   };
 }
 
-export function waitTurns(who) {
-  return function(dispatch, getState) {
-    const gameState = getState().gameState;
-    if (gameState.waitTurn) {
-      dispatch(updateGameFactor("waitTurn", 0));
-      dispatch({ type: "WAIT_TURNS", waitTurns: gameState.waitTurn - 1, who });
-    } else {
-      dispatch({ type: "WAIT_TURNS", waitTurns: gameState[who].wait - 1, who });
-    }
-  };
-}
-
-export function addToPile(cards) {
-  return dispatch => {
-    dispatch({
-      type: "ADD_TO_PILE",
-      cards: cards
-    });
-  };
-}
-
-export function takeCards(who) {
-  return function(dispatch, getState) {
-    const gameState = getState().gameState;
-    let howMany = gameState.cardsToTake - 1;
-    if (!howMany) howMany = 1;
-
-    let deck = gameState.deck;
-    if (deck.length < howMany) {
-      dispatch(playSound("shuffle"));
-      dispatch(shuffleDeck);
-      deck = getState().gameState.deck;
-    }
-    const cardsToTake = deck.slice(deck.length - howMany, deck.length);
-    dispatch({
-      type: "TAKE_FROM_DECK",
-      howMany
-    });
-    let cardsToUpdate = sortCards([
-      ...cardsToTake,
-      ..._.cloneDeep(gameState[who].cards)
-    ]);
-
-    if (who === "player") dispatch(updatePlayerCards(cardsToUpdate));
-    else dispatch(updateCpuCards(cardsToUpdate));
-
-    if (gameState.battleCardActive)
-      dispatch(updateGameFactor("battleCardActive", false));
-
-    if (gameState.cardsToTake > 1) dispatch(updateGameFactor("cardsToTake", 1));
-    // dispatch(updateGameFactor("nextTurn", !getState().gameState.nextTurn));
-  };
-}
-
-export function updatePlayerCards(cards) {
-  return function(dispatch, getState) {
-    // dispatch(updateGameFactor("nextTurn", 1));
-    dispatch({ type: UPDATE_PLAYER_CARDS, cards });
-  };
-}
-
-export function updateGameFactor(factor, value) {
-  return dispatch => {
-    dispatch(checkSoundsToPlay(factor, value));
-    dispatch({
-      type: "UPDATE_GAME_FACTOR",
-      factor,
-      value
-    });
-  };
-}
-
-export function updateCpuCards(cards) {
-  return function(dispatch, getState) {
-    cards = cards.map(card => {
-      card = _.omit(card, "sameTypeAmount");
-      card = _.omit(card, "sameWeightAmount");
-      return card;
-    });
-    dispatch({ type: "UPDATE_CPU_CARDS", cards });
-    // dispatch(updateGameFactor("nextTurn", 0));
-  };
-}
-
-export function shuffleDeck() {
-  return function(dispatch, getState) {
-    const { pile } = getState().gameState;
-    let cardsForShuffle = _.cloneDeep(pile);
-    cardsForShuffle.pop();
-    let shuffledCards = _.shuffle(cardsForShuffle);
-    dispatch({
-      type: "SHUFFLED_CARDS",
-      cards: shuffledCards
-    });
-  };
-}
-
-export function addToDeck(cards) {
-  return dispatch => {
-    dispatch({
-      type: "ADD_TO_DECK",
-      cards
-    });
-  };
-}
-
-export function newGame() {
-  return dispatch => {
-    dispatch({
-      type: "NEW_GAME"
-    });
-  };
-}
-
-export function checkMacaoAndWin() {
-  return function(dispatch, getState) {
-    const gameState = getState().gameState;
-    if (
-      gameState.player.cards.length === 1 ||
-      gameState.cpuPlayer.cards.length === 1
-    ) {
-      dispatch({ type: "SHOW_MODAL", modal: "macao" });
-      setTimeout(() => {
-        dispatch({ type: "HIDE_MODAL", modal: "macao" });
-      }, 1000);
-    }
-
-    if (
-      gameState.player.cards.length === 0 ||
-      gameState.cpuPlayer.cards.length === 0
-    )
-      dispatch({ type: "SHOW_MODAL", modal: "gameOver" });
-  };
-}
-
-// OLD CODE TO REFACTOR
+//
+//
+//
+// VERY OLD CODE TO REFACTOR
 //          |
 //          |
 //          v
+//
 export function makeCpuMove() {
   return function(dispatch, getState) {
     const { gameState } = getState(),
@@ -687,7 +694,5 @@ export function makeCpuMove() {
         }
       });
     }
-
-    // dispatch(updateGameFactor("nextTurn", !gameState.nextTurn));
   };
 }
