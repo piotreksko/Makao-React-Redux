@@ -64,7 +64,7 @@ export function shuffleDeck() {
     let cardsForShuffle = _.cloneDeep(pile).pop();
     let shuffledCards = _.shuffle(cardsForShuffle);
     dispatch({
-      type: "SHUFFLED_CARDS",
+      type: "SHUFFLE_DECK",
       cards: shuffledCards
     });
   };
@@ -148,6 +148,7 @@ export function takeCards(who) {
     else dispatch(updateCpuCards(newCardsWithTakenCards));
 
     if (gameState.cardsToTake > 1) dispatch(updateGameFactor("cardsToTake", 1));
+    if (gameState.jackActive ) dispatch(updateGameFactor("jackActive", 0));
     if (gameState.battleCardActive)
       dispatch(updateGameFactor("battleCardActive", false));
   };
@@ -162,11 +163,10 @@ function nobodyIsWaiting() {
 
 export function makePlayerMove(cards) {
   return function(dispatch, getState) {
-    
     // Clear cards from class key
     cards = cards.map(card => (card = _.omit(card, "class")));
 
-    const newPlayerCards = verifyUsedCards(cards);
+    const newPlayerCards = dispatch(verifyUsedCards(cards));
 
     dispatch(addToPile(cards));
     dispatch(updatePlayerCards(newPlayerCards));
@@ -205,7 +205,7 @@ function verifyUsedCards(cards) {
           gameFactors.jackActive = 3;
           break;
         case "ace":
-          dispatch({ type: "SHOW_MODAL", modal: "macao" });
+          dispatch({ type: "SHOW_MODAL", modal: "ace" });
           break;
         case "king":
           if (
@@ -215,7 +215,6 @@ function verifyUsedCards(cards) {
             gameFactors.cardsToTake += 5;
             break;
           }
-
           //Kings of clubs and diamonds nullify amount of cards to be taken
           else {
             gameFactors.cardsToTake = 1;
@@ -232,7 +231,7 @@ function verifyUsedCards(cards) {
       newPlayerCards.splice(cardIndexInPlayerCards, 1);
     });
 
-    checkGameFactorsToUpdate(gameFactors);
+    dispatch(checkGameFactorsToUpdate(gameFactors));
     return newPlayerCards;
   };
 }
@@ -253,446 +252,495 @@ function checkGameFactorsToUpdate(gameFactors) {
   };
 }
 
-//
-//
-//
-// VERY OLD CODE TO REFACTOR
-//          |
-//          |
-//          v
-//
 export function makeCpuMove() {
   return function(dispatch, getState) {
-    const { gameState } = getState(),
-      {
-        jackActive,
-        battleCardActive,
-        waitTurn,
-        cardsToTake,
-        chosenWeight,
-        chosenType,
-        deck,
-        pile
-      } = gameState,
-      playerWait = gameState.player.wait,
-      playerCards = gameState.player.cards;
-
-    let cpuWait = gameState.cpuPlayer.wait,
-      gameFactors = {
-        cardsToTake,
-        waitTurn,
-        jackActive,
-        battleCardActive,
-        chosenType,
-        chosenWeight
-      },
-      pileTopCard = gameState.pile[gameState.pile.length - 1],
-      newCpuCards = _.cloneDeep(gameState.cpuPlayer.cards),
-      availableCards = [],
-      cardsToUse = [];
+    let cpuWait = getState().gameState.cpuPlayer.wait;
 
     if (getState().modals.gameOver) return;
 
-    const nobodyIsWaiting = () => !playerWait && !cpuWait;
-
-    pileTopCard.type === "ace"
-      ? (availableCards = newCpuCards.filter(
-          card =>
-            card.weight === gameFactors.chosenWeight ||
-            card.type === pileTopCard.type
-        ))
-      : (availableCards = newCpuCards.filter(
-          card =>
-            card.weight === pileTopCard.weight || card.type === pileTopCard.type
-        ));
-
-    if (jackActive) {
-      availableCards = newCpuCards.filter(
-        card => "jack" === card.type || card.type === gameFactors.chosenType
-      );
-    }
-    if (cpuWait) return noCardsToUse();
-
-    //IF CPU does have available cards
+    if (cpuWait) return dispatch(noCardsToUse());
+    let availableCards = dispatch(getAvailableCards());
 
     if (availableCards.length) {
-      //console.log("cpu had available cards");
+      dispatch(hasCardsAvailable(availableCards));
+    } else {
+      dispatch(noCardsToUse());
+    }
+  };
+}
 
-      //Map all cards to get information about cards of same type & weight
-      let cpuPossibleMoves = availableCards.map(card => {
-        return {
-          type: card.type,
-          weight: card.weight,
-          sameTypeAmount: (() => {
-            let amount = 0;
-            newCpuCards.forEach(c => {
-              if (c.type === card.type) {
-                amount += 1;
-              }
-            });
-            return amount - 1;
-          })(),
-          sameWeightAmount: (() => {
-            let moves = 0;
-            newCpuCards.forEach(c => {
-              if (c.weight === card.weight) {
-                moves += 1;
-              }
-            });
-            return moves - 1;
-          })()
-        };
-      });
+function getAvailableCards() {
+  return function(dispatch, getState) {
+    const gameState = getState().gameState;
+    const { chosenWeight, chosenType, jackActive, cpuPlayer, pile } = gameState;
 
-      let neutralCards = getNeutralCards(cpuPossibleMoves);
-      let allNeutralCards = getNeutralCards(newCpuCards);
+    const pileTopCard = pile[pile.length - 1];
+    const cards = cpuPlayer.cards;
 
-      function getNeutralCards(array) {
-        return array.filter(
-          card =>
-            card.type === "5" ||
-            card.type === "6" ||
-            card.type === "7" ||
-            card.type === "8" ||
-            card.type === "9" ||
-            card.type === "10" ||
-            card.type === "queen" ||
-            (card.type === "king" && card.weight === "diamonds") ||
-            (card.type === "king" && card.weight === "clubs")
-        );
-      }
-      let battleCards = cpuPossibleMoves.filter(
-        card =>
-          card.type === "2" ||
-          card.type === "3" ||
-          (card.type === "king" && card.weight === "hearts") ||
-          (card.type === "king" && card.weight === "spades")
+    let availableCards;
+
+    if (pileTopCard.type === "ace") {
+      availableCards = cards.filter(
+        card => card.weight === chosenWeight || card.type === pileTopCard.type
       );
-      let fours = cpuPossibleMoves.filter(card => card.type === "4");
-      let jacks = cpuPossibleMoves.filter(card => card.type === "jack");
-      let aces = cpuPossibleMoves.filter(card => card.type === "ace");
-      let kings = cpuPossibleMoves.filter(
-        card =>
-          (card.type === "king" && card.weight === "diamonds") ||
-          (card.type === "king" && card.weight === "clubs")
+    } else if (jackActive) {
+      availableCards = cards.filter(
+        card => "jack" === card.type || card.type === chosenType
       );
+    } else {
+      availableCards = cards.filter(
+        card =>
+          card.weight === pileTopCard.weight || card.type === pileTopCard.type
+      );
+    }
+    return availableCards;
+  };
+}
 
-      //Use jack if one neutral card is available
-      if (
-        jacks.length &&
-        !battleCardActive &&
-        !cpuWait &&
-        neutralCards.length === 1
-      ) {
-        cardsToUse = jacks;
-      }
+function hasCardsAvailable(availableCards) {
+  return function(dispatch, getState) {
+    let cardsToUse = dispatch(checkCardsToUse(availableCards));
 
-      let cardsDifference;
-      newCpuCards.length - playerCards.length > 0
-        ? (cardsDifference = newCpuCards.length - playerCards.length)
-        : (cardsDifference = 0);
-      if (newCpuCards.length === playerCards.length) {
-        cardsDifference = 1;
-      }
+    if (!cardsToUse) {
+      return dispatch(noCardsToUse());
+    } else {
+      cardsToUse = dispatch(setBestTopCard(cardsToUse));
+      debugger;
 
-      function neutralValue() {
-        if (
-          neutralCards.length === 0 ||
-          battleCardActive ||
-          waitTurn ||
-          cpuWait
-        ) {
-          return 0;
-        } else {
-          let weight = 15;
-          let value = neutralCards.length * weight;
-          return value;
-        }
-      }
-      function battleValue() {
-        if (battleCards.length === 0 || waitTurn || cpuWait || jackActive) {
-          return 0;
-        } else {
-          let weight = 6;
-          let value =
-            battleCards.length * weight +
-            (Math.pow(cardsDifference, 2) / 10) * weight;
-          return value;
-        }
-      }
-      function foursValue() {
-        if (fours.length === 0 || battleCardActive || jackActive || cpuWait) {
-          return 0;
-        } else {
-          let weight;
-          let foursOnPile = pile.filter(x => x.type === "4").length;
+      let newCpuCards = dispatch(verifyCardsFromAI(cardsToUse));
 
-          (function checkWeight() {
-            if (4 - foursOnPile - fours.length === 0) {
-              weight = 500;
-            } else if (4 - foursOnPile - fours.length === 1) {
-              weight = 20;
-            } else if (4 - foursOnPile - fours.length === 2) {
-              weight = 5;
-            } else {
-              weight = 2;
-            }
-          })();
-
-          let value = (weight * deck.length) / playerCards.length;
-          return value;
-        }
-      }
-      function jacksValue() {
-        if (jacks.length === 0 || battleCardActive || waitTurn || cpuWait) {
-          return 0;
-        } else {
-          let jacksWeight = 24;
-          let jackNeutralRatio = 1;
-          if (neutralCards.length) {
-            jackNeutralRatio = jacksWeight / neutralCards.length;
-          }
-          let value =
-            jacks.length * jackNeutralRatio +
-            (cardsDifference / jacksWeight) * 3 +
-            (jacksWeight / playerCards.length) * 2;
-          return value;
-        }
-      }
-      function acesValue() {
-        if (
-          aces.length === 0 ||
-          battleCardActive ||
-          waitTurn ||
-          cpuWait ||
-          jackActive
-        ) {
-          return 0;
-        } else {
-          let weight = 3;
-          let value =
-            aces.length * weight +
-            (newCpuCards.length / availableCards.length) * weight;
-          return value;
-        }
-      }
-      function kingsValue() {
-        if (
-          kings.length &&
-          ((pileTopCard.type === "king" && pileTopCard.weight === "hearts") ||
-            (pileTopCard.type === "king" && pileTopCard.weight === "spades"))
-        ) {
-          return 15;
-        } else {
-          return 0;
-        }
-      }
-
-      let min = 0;
-      let max =
-        neutralValue() +
-        battleValue() +
-        foursValue() +
-        jacksValue() +
-        acesValue() +
-        kingsValue();
-      let previousUpperRange = 0;
-
-      let neutralRange = calculateRange(neutralValue());
-      let battleRange = calculateRange(battleValue());
-      let foursRange = calculateRange(foursValue());
-      let jacksRange = calculateRange(jacksValue());
-      let acesRange = calculateRange(acesValue());
-      let kingsRange = calculateRange(kingsValue());
-
-      function calculateRange(rangeWidth) {
-        previousUpperRange = previousUpperRange + rangeWidth;
-        if (rangeWidth) {
-          previousUpperRange += rangeWidth;
-          return previousUpperRange;
-        } else {
-          return 0;
-        }
-      }
-
-      let rand = function(min, max) {
-        return Math.random() * (max - min) + min;
-      };
-
-      let randomNumber = rand(min, max);
-      let weightPicked;
-      if (randomNumber < neutralRange) {
-        cardsToUse = neutralCards;
-        weightPicked = 1;
-      } else if (randomNumber < battleRange) {
-        cardsToUse = battleCards;
-        weightPicked = 2;
-      } else if (randomNumber < foursRange) {
-        cardsToUse = fours;
-        weightPicked = 3;
-      } else if (randomNumber < jacksRange) {
-        cardsToUse = jacks;
-        weightPicked = 4;
-      } else if (randomNumber < acesRange) {
-        cardsToUse = aces;
-        weightPicked = 5;
-      } else if (randomNumber < kingsRange) {
-        cardsToUse = kings;
-        weightPicked = 6;
-      }
-
-      if (jacks.length && neutralCards.length === 1) {
-        cardsToUse = jacks;
-        weightPicked = 4;
-      }
-
-      if (gameState.jackActive && weightPicked !== 4) {
-        gameFactors.jackActive -= 1;
-      }
-
-      if (randomNumber === 0) {
-        return noCardsToUse();
-      } else {
-        let mostMoves = cardsToUse.reduce((prev, curr) =>
-          prev.possibleCardsAfter < curr.possibleCardsAfter ? prev : curr
-        );
-
-        let cpuSelectedCards = [];
-
-        if (!mostMoves.sameTypeAmount) {
-          availableCards = [];
-          cpuSelectedCards.push(mostMoves);
-        } else {
-          cpuSelectedCards = newCpuCards.filter(c => c.type === mostMoves.type);
-
-          //While the first selected card does not match the card on pile - move it to the end of array
-          if (
-            pileTopCard.type !== cpuSelectedCards[0].type &&
-            pileTopCard.type !== "ace" &&
-            !jackActive
-          ) {
-            while (cpuSelectedCards[0].weight !== pileTopCard.weight) {
-              const firstCard = cpuSelectedCards.shift();
-              cpuSelectedCards.push(firstCard);
-            }
-          }
-          if (
-            gameFactors.chosenType !== cpuSelectedCards[0].type &&
-            pileTopCard.type === "ace" &&
-            !jackActive
-          ) {
-            while (cpuSelectedCards[0].weight !== gameFactors.chosenWeight) {
-              const firstCard = cpuSelectedCards.shift();
-              cpuSelectedCards.push(firstCard);
-            }
-          }
-        }
-
-        cpuSelectedCards.forEach(card => {
-          let notCheckedYet = true;
-          switch (card.type) {
-            case "2":
-              if (nobodyIsWaiting()) gameFactors.cardsToTake += 2;
-              break;
-            case "3":
-              if (nobodyIsWaiting()) gameFactors.cardsToTake += 3;
-              break;
-            case "4":
-              gameFactors.waitTurn += 1;
-              break;
-            case "jack":
-              if (allNeutralCards.length) {
-                for (let i = 0; i < 2; i++) {
-                  let index = allNeutralCards.findIndex(x => x.type === "king");
-                  if (index !== -1)
-                    allNeutralCards = allNeutralCards.slice(index, 1);
-                  else i = 2;
-                }
-                if (allNeutralCards.length)
-                  gameFactors.chosenType = allNeutralCards.reduce(
-                    (prev, curr) =>
-                      prev.sameTypeAmount < curr.sameTypeAmount ? prev : curr
-                  ).type;
-                else gameFactors.chosenType = null;
-              }
-              gameFactors.chosenType
-                ? (gameFactors.jackActive = 2)
-                : (gameFactors.jackActive = 0);
-              break;
-            case "ace":
-              if (notCheckedYet) {
-                let cpuCardsWithoutMostMoves = [...newCpuCards];
-                cpuCardsWithoutMostMoves.splice(
-                  cpuCardsWithoutMostMoves.indexOf(mostMoves),
-                  1
-                );
-                if (newCpuCards.length > 1)
-                  gameFactors.chosenWeight = cpuCardsWithoutMostMoves.reduce(
-                    (prev, curr) =>
-                      prev.sameWeightAmount < curr.sameWeightAmount
-                        ? prev
-                        : curr
-                  ).weight;
-                //console.log("chosenWeight");
-                //console.log(chosenWeight);
-              }
-              break;
-            case "king":
-              if (
-                card.weight === "hearts" ||
-                (card.weight === "spades" && nobodyIsWaiting())
-              ) {
-                gameFactors.cardsToTake += 5;
-                break;
-              }
-
-              //Kings of clubs and diamonds nullify amount of cards to be taken
-              else {
-                gameFactors.cardsToTake = 1;
-                break;
-              }
-            default:
-              break;
-          }
-          let indexInCpuCards = newCpuCards.findIndex(
-            x => x.type === card.type && x.weight === card.weight
-          );
-          newCpuCards.splice(indexInCpuCards, 1);
-        });
-        availableCards = [];
-        dispatch(addToPile(cpuSelectedCards));
-      }
+      availableCards = [];
+      dispatch(addToPile(cardsToUse));
       newCpuCards = sortCards(newCpuCards);
       dispatch(updateCpuCards(newCpuCards));
-      updateGameFactors();
+    }
+  };
+}
+
+function noCardsToUse() {
+  return function(dispatch, getState) {
+    const gameState = getState().gameState;
+
+    let gameFactors = {
+      jackActive: gameState.jackActive
+    };
+
+    if (gameFactors.jackActive) {
+      gameFactors.jackActive -= 1;
+    }
+
+    checkGameFactorsToUpdate(gameFactors);
+
+    if (gameState.waitTurn > 0 || gameState.cpuPlayer.wait) {
+      dispatch(waitTurns("cpuPlayer"));
     } else {
-      noCardsToUse();
+      dispatch(takeCards("cpuPlayer"));
     }
-    // gameState.playerTurn = true;
+  };
+}
 
-    function noCardsToUse() {
-      if (gameFactors.jackActive) {
-        gameFactors.jackActive -= 1;
-      }
-      updateGameFactors();
+function getSameTypeAndWeightAmount(availableCards, cpuCards) {
+  return availableCards.map(card => {
+    return {
+      type: card.type,
+      weight: card.weight,
+      sameTypeAmount: (() => {
+        let amount = 0;
+        cpuCards.forEach(c => {
+          if (c.type === card.type) {
+            amount += 1;
+          }
+        });
+        return amount - 1;
+      })(),
+      sameWeightAmount: (() => {
+        let moves = 0;
+        cpuCards.forEach(c => {
+          if (c.weight === card.weight) {
+            moves += 1;
+          }
+        });
+        return moves - 1;
+      })()
+    };
+  });
+}
 
-      // Do nothing if last card was 4
-      if (waitTurn > 0 || cpuWait) {
-        dispatch(waitTurns("cpuPlayer"));
+function getNeutralCards(cards) {
+  return cards.filter(
+    card =>
+      card.type === "5" ||
+      card.type === "6" ||
+      card.type === "7" ||
+      card.type === "8" ||
+      card.type === "9" ||
+      card.type === "10" ||
+      card.type === "queen" ||
+      (card.type === "king" && card.weight === "diamonds") ||
+      (card.type === "king" && card.weight === "clubs")
+  );
+}
+
+function getBattleCards(cards) {
+  return cards.filter(
+    card =>
+      card.type === "2" ||
+      card.type === "3" ||
+      (card.type === "king" && card.weight === "hearts") ||
+      (card.type === "king" && card.weight === "spades")
+  );
+}
+
+function getCardsDifferenceBetweenPlayers() {
+  return function(dispatch, getState) {
+    const gameState = getState().gameState;
+    const cpuCards = gameState.cpuPlayer.cards;
+    const playerCards = gameState.player.cards;
+
+    if (cpuCards.length - playerCards.length > 0) {
+      return cpuCards.length - playerCards.length;
+    } else if (cpuCards.length === playerCards.length) {
+      return 1;
+    } else {
+      return 0;
+    }
+  };
+}
+
+function checkCardsToUse(availableCards) {
+  return function(dispatch, getState) {
+    const cpuCards = _.cloneDeep(getState().gameState.cpuPlayer.cards);
+    const cardsDifference = dispatch(getCardsDifferenceBetweenPlayers());
+    const gameState = getState().gameState;
+    const { battleCardActive, waitTurn, jackActive, pile, deck } = gameState;
+    const pileTopCard = pile[pile.length - 1];
+    const cpuWait = gameState.cpuPlayer.wait;
+    const playerCards = gameState.player.cards;
+
+    // Get information about cards of same type & weight
+    let cpuCardsTypeAndWeight = getSameTypeAndWeightAmount(
+      availableCards,
+      cpuCards
+    );
+
+    let neutralCards = getNeutralCards(cpuCardsTypeAndWeight);
+    let battleCards = getBattleCards(cpuCards);
+    let fours = cpuCardsTypeAndWeight.filter(card => card.type === "4");
+    let jacks = cpuCardsTypeAndWeight.filter(card => card.type === "jack");
+    let aces = cpuCardsTypeAndWeight.filter(card => card.type === "ace");
+    let kings = cpuCardsTypeAndWeight.filter(
+      card =>
+        (card.type === "king" && card.weight === "diamonds") ||
+        (card.type === "king" && card.weight === "clubs")
+    );
+
+    function getNeutralValue() {
+      if (
+        neutralCards.length === 0 ||
+        battleCardActive ||
+        waitTurn ||
+        cpuWait
+      ) {
+        return 0;
       } else {
-        dispatch(takeCards("cpuPlayer"));
+        let weight = 15;
+        let value = neutralCards.length * weight;
+        return value;
       }
     }
 
-    function updateGameFactors() {
-      if (gameFactors.cardsToTake > 1) gameFactors.battleCardActive = true;
-      else gameFactors.battleCardActive = false;
-
-      _.forOwn(gameFactors, function(value, key) {
-        if (value !== gameState[key]) {
-          dispatch(updateGameFactor(key, value));
-        }
-      });
+    function getBattleValue() {
+      if (battleCards.length === 0 || waitTurn || cpuWait || jackActive) {
+        return 0;
+      } else {
+        let weight = 6;
+        let value =
+          battleCards.length * weight +
+          (Math.pow(cardsDifference, 2) / 10) * weight;
+        return value;
+      }
     }
+
+    function getFoursValue() {
+      if (fours.length === 0 || battleCardActive || jackActive || cpuWait) {
+        return 0;
+      } else {
+        let weight;
+        let foursOnPile = pile.filter(x => x.type === "4").length;
+
+        (function checkWeight() {
+          if (4 - foursOnPile - fours.length === 0) {
+            weight = 500;
+          } else if (4 - foursOnPile - fours.length === 1) {
+            weight = 20;
+          } else if (4 - foursOnPile - fours.length === 2) {
+            weight = 5;
+          } else {
+            weight = 2;
+          }
+        })();
+
+        let value = (weight * deck.length) / playerCards.length;
+        return value;
+      }
+    }
+
+    function getJacksValue() {
+      if (jacks.length === 0 || battleCardActive || waitTurn || cpuWait) {
+        return 0;
+      } else {
+        let jacksWeight = 24;
+        let jackNeutralRatio = 1;
+        if (neutralCards.length) {
+          jackNeutralRatio = jacksWeight / neutralCards.length;
+        }
+        let value =
+          jacks.length * jackNeutralRatio +
+          (cardsDifference / jacksWeight) * 3 +
+          (jacksWeight / playerCards.length) * 2;
+        return value;
+      }
+    }
+
+    function getAcesValue() {
+      if (
+        aces.length === 0 ||
+        battleCardActive ||
+        waitTurn ||
+        cpuWait ||
+        jackActive
+      ) {
+        return 0;
+      } else {
+        let weight = 3;
+        let value =
+          aces.length * weight +
+          (cpuCards.length / availableCards.length) * weight;
+        return value;
+      }
+    }
+
+    function getKingsValue() {
+      if (
+        kings.length &&
+        ((pileTopCard.type === "king" && pileTopCard.weight === "hearts") ||
+          (pileTopCard.type === "king" && pileTopCard.weight === "spades"))
+      ) {
+        return 15;
+      } else {
+        return 0;
+      }
+    }
+    debugger;
+    const neutralValue = getNeutralValue();
+    const battleValue = getBattleValue();
+    const foursValue = getBattleValue();
+    const jacksValue = getBattleValue();
+    const acesValue = getBattleValue();
+    const kingsValue = getBattleValue();
+
+    let min = 0;
+    let max =
+      neutralValue +
+      battleValue +
+      foursValue +
+      jacksValue +
+      acesValue +
+      kingsValue;
+    let previousUpperRange = 0;
+
+    let ranges = {
+      neutral: calculateRange(getNeutralValue(), previousUpperRange),
+      battle: calculateRange(getBattleValue(), previousUpperRange),
+      fours: calculateRange(getFoursValue(), previousUpperRange),
+      jacks: calculateRange(getJacksValue(), previousUpperRange),
+      aces: calculateRange(getAcesValue(), previousUpperRange),
+      kings: calculateRange(getKingsValue(), previousUpperRange)
+    };
+
+    let rand = function(min, max) {
+      return Math.random() * (max - min) + min;
+    };
+
+    let randomNumber = rand(min, max);
+
+    let cardsToUse;
+
+    if (randomNumber < ranges.neutral) {
+      cardsToUse = neutralCards;
+    } else if (randomNumber < ranges.battle) {
+      cardsToUse = battleCards;
+    } else if (randomNumber < ranges.fours) {
+      cardsToUse = fours;
+    } else if (randomNumber < ranges.fours) {
+      cardsToUse = jacks;
+    } else if (randomNumber < ranges.jacks) {
+      cardsToUse = aces;
+    } else if (randomNumber < ranges.kinds) {
+      cardsToUse = kings;
+    }
+
+    if (jacks.length && neutralCards.length === 1) {
+      cardsToUse = jacks;
+    }
+    return cardsToUse;
+  };
+}
+
+function calculateRange(rangeWidth, previousUpperRange) {
+  previousUpperRange = previousUpperRange + rangeWidth;
+  if (rangeWidth) {
+    previousUpperRange += rangeWidth;
+    return previousUpperRange;
+  } else {
+    return 0;
+  }
+}
+
+function getCardWithMostMoves(cards) {
+  return cards.reduce((prev, curr) =>
+    prev.possibleCardsAfter < curr.possibleCardsAfter ? prev : curr
+  );
+}
+
+function setBestTopCard(cardsToUse) {
+  return function(dispatch, getState) {
+    const gameState = getState().gameState;
+
+    const { pile, cpuPlayer, jackActive, chosenType, chosenWeight } = gameState;
+    const cpuCards = cpuPlayer.cards;
+    const pileTopCard = pile[pile.length - 1];
+    let mostMovesCard = getCardWithMostMoves(cardsToUse);
+    let cpuSelectedCards = [];
+
+    if (!mostMovesCard.sameTypeAmount) {
+      cpuSelectedCards.push(mostMovesCard);
+    } else {
+      cpuSelectedCards = cpuCards.filter(c => c.type === mostMovesCard.type);
+
+      //While the first selected card does not match the card on pile - move it to the end of array
+      if (
+        pileTopCard.type !== cpuSelectedCards[0].type &&
+        pileTopCard.type !== "ace" &&
+        !jackActive
+      ) {
+        while (cpuSelectedCards[0].weight !== pileTopCard.weight) {
+          const firstCard = cpuSelectedCards.shift();
+          cpuSelectedCards.push(firstCard);
+        }
+      }
+      if (
+        chosenType !== cpuSelectedCards[0].type &&
+        pileTopCard.type === "ace" &&
+        !jackActive
+      ) {
+        while (cpuSelectedCards[0].weight !== chosenWeight) {
+          const firstCard = cpuSelectedCards.shift();
+          cpuSelectedCards.push(firstCard);
+        }
+      }
+    }
+    return cpuSelectedCards;
+  };
+}
+
+function verifyCardsFromAI(cardsToUse) {
+  return function(dispatch, getState) {
+    const gameState = getState().gameState;
+
+    let {
+      cardsToTake,
+      waitTurn,
+      jackActive,
+      battleCardActive,
+      chosenType,
+      chosenWeight,
+      cpuPlayer
+    } = gameState;
+
+    let gameFactors = {
+      cardsToTake,
+      waitTurn,
+      jackActive,
+      battleCardActive,
+      chosenType,
+      chosenWeight
+    };
+
+    const cpuCards = cpuPlayer.cards;
+    let newCpuCards = _.cloneDeep(cpuPlayer.cards);
+    let allNeutralCards = getNeutralCards(cpuCards);
+    let mostMovesCard = getCardWithMostMoves(cardsToUse);
+
+    cardsToUse.forEach(card => {
+      let notCheckedYet = true;
+      switch (card.type) {
+        case "2":
+          if (nobodyIsWaiting()) gameFactors.cardsToTake += 2;
+          break;
+        case "3":
+          if (nobodyIsWaiting()) gameFactors.cardsToTake += 3;
+          break;
+        case "4":
+          gameFactors.waitTurn += 1;
+          break;
+        case "jack":
+          if (allNeutralCards.length) {
+            for (let i = 0; i < 2; i++) {
+              let index = allNeutralCards.findIndex(x => x.type === "king");
+              if (index !== -1)
+                allNeutralCards = allNeutralCards.slice(index, 1);
+              else i = 2;
+            }
+            if (allNeutralCards.length)
+              gameFactors.chosenType = allNeutralCards.reduce((prev, curr) =>
+                prev.sameTypeAmount < curr.sameTypeAmount ? prev : curr
+              ).type;
+            else gameFactors.chosenType = null;
+          }
+          gameFactors.chosenType
+            ? (gameFactors.jackActive = 2)
+            : (gameFactors.jackActive = 0);
+          break;
+        case "ace":
+          if (notCheckedYet) {
+            let cpuCardsWithoutMostMoves = [...newCpuCards];
+            cpuCardsWithoutMostMoves.splice(
+              cpuCardsWithoutMostMoves.indexOf(mostMovesCard),
+              1
+            );
+            if (newCpuCards.length > 1)
+              gameFactors.chosenWeight = cpuCardsWithoutMostMoves.reduce(
+                (prev, curr) =>
+                  prev.sameWeightAmount < curr.sameWeightAmount ? prev : curr
+              ).weight;
+          }
+          break;
+        case "king":
+          if (
+            card.weight === "hearts" ||
+            (card.weight === "spades" && nobodyIsWaiting())
+          ) {
+            gameFactors.cardsToTake += 5;
+            break;
+          }
+
+          //Kings of clubs and diamonds nullify amount of cards to be taken
+          else {
+            gameFactors.cardsToTake = 1;
+            break;
+          }
+        default:
+          break;
+      }
+      debugger;
+      let indexInCpuCards = newCpuCards.findIndex(
+        x => x.type === card.type && x.weight === card.weight
+      );
+      newCpuCards.splice(indexInCpuCards, 1);
+    });
+    dispatch(checkGameFactorsToUpdate(gameFactors));
+    dispatch(checkMacaoAndWin());
+    return newCpuCards;
   };
 }

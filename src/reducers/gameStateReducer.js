@@ -12,7 +12,6 @@ import {
   WAIT_TURNS,
   RESTART_GAME
 } from "../actions/logicActions";
-import * as soundActions from '../actions/soundActions';
 import { cardTypes, cardWeights } from "../constants/constants";
 import { sortCards } from "../utility/utility";
 import _ from "lodash";
