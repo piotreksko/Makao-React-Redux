@@ -3,13 +3,19 @@
 My favorite cards game - Makao. 
 WORK in progress
 
+### Working:
+* Whole game logic mentioned in rules
+* AI
+* Cards highlighting and picking
+* Sound effects
+
 ### Things to do:
 
 * Working stats tracking
-* Animations
+* More Animations
 * Sound effects
 * Tests
-* AI algorithm
+* Improve and refactor AI algorithm
 * More features e.g. more AI players
 
 Reweritten from a jQuery version - https://github.com/piotreksko/Makao
