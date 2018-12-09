@@ -61,12 +61,14 @@ export function updateCpuCards(cards) {
 export function shuffleDeck() {
   return function(dispatch, getState) {
     const { pile } = getState().gameState;
-    let cardsForShuffle = _.cloneDeep(pile).pop();
+    let cardsForShuffle = _.cloneDeep(pile)
+    cardsForShuffle.pop();
     let shuffledCards = _.shuffle(cardsForShuffle);
     dispatch({
       type: "SHUFFLE_DECK",
       cards: shuffledCards
     });
+    dispatch(playSound("shuffle"));
   };
 }
 
@@ -94,8 +96,8 @@ export function addToPile(cards) {
 export function checkMacaoAndWin() {
   return function(dispatch, getState) {
     const gameState = getState().gameState;
-    checkMacao(gameState);
-    checkWin(gameState);
+    dispatch(checkMacao(gameState));
+    dispatch(checkWin(gameState));
   };
 }
 
@@ -116,8 +118,8 @@ export function checkMacao(gameState) {
 export function checkWin(gameState) {
   return dispatch => {
     if (
-      gameState.player.cards.length === 0 ||
-      gameState.cpuPlayer.cards.length === 0
+      !gameState.player.cards.length ||
+      !gameState.cpuPlayer.cards.length
     )
       dispatch({ type: "SHOW_MODAL", modal: "gameOver" });
   };
@@ -125,15 +127,14 @@ export function checkWin(gameState) {
 
 export function takeCards(who) {
   return function(dispatch, getState) {
-    const gameState = getState().gameState;
+      const gameState = getState().gameState;
     let howMany = gameState.cardsToTake - 1;
     if (!howMany) howMany = 1;
 
     // Check if there are enough cards on deck
     let deck = gameState.deck;
     if (deck.length < howMany) {
-      dispatch(playSound("shuffle"));
-      dispatch(shuffleDeck);
+      dispatch(shuffleDeck());
       deck = getState().gameState.deck;
     }
     dispatch({ type: "TAKE_FROM_DECK", howMany });
@@ -148,7 +149,7 @@ export function takeCards(who) {
     else dispatch(updateCpuCards(newCardsWithTakenCards));
 
     if (gameState.cardsToTake > 1) dispatch(updateGameFactor("cardsToTake", 1));
-    if (gameState.jackActive ) dispatch(updateGameFactor("jackActive", 0));
+    if (gameState.jackActive ) dispatch(updateGameFactor("jackActive", gameState.jackActive - 1));
     if (gameState.battleCardActive)
       dispatch(updateGameFactor("battleCardActive", false));
   };
@@ -305,7 +306,6 @@ function hasCardsAvailable(availableCards) {
       return dispatch(noCardsToUse());
     } else {
       cardsToUse = dispatch(setBestTopCard(cardsToUse));
-      debugger;
 
       let newCpuCards = dispatch(verifyCardsFromAI(cardsToUse));
 
@@ -531,7 +531,7 @@ function checkCardsToUse(availableCards) {
         return 0;
       }
     }
-    debugger;
+
     const neutralValue = getNeutralValue();
     const battleValue = getBattleValue();
     const foursValue = getBattleValue();
@@ -733,7 +733,7 @@ function verifyCardsFromAI(cardsToUse) {
         default:
           break;
       }
-      debugger;
+
       let indexInCpuCards = newCpuCards.findIndex(
         x => x.type === card.type && x.weight === card.weight
       );

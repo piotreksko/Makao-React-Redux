@@ -1,5 +1,4 @@
 import React from "react";
-import Confetti from "react-dom-confetti";
 
 export default function GameOverModal(props) {
   return (
