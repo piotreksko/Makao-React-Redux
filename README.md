@@ -11,6 +11,7 @@ WORK in progress
 
 ### Things to do:
 
+* Fix bugs introduced in last commit
 * Working stats tracking
 * More Animations
 * Sound effects
