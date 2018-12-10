@@ -1,16 +1,18 @@
 import React from "react";
 import Card from "./cards/Card";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 
 export default function Pile(props) {
-  if (!props.cardOnTop) return null;
+if (!props.cards) return null;
   return (
     <div id="pile">
-      <Card card={props.cardOnTop} />{" "}
+      {props.cards.map((card, idx) => (
+        <Card card={card} fromPile={true} key={idx}/>
+      ))}
     </div>
   );
 }
 
-Pile.propTypes = { 
-  cardOnTop: PropTypes.object
- };
+Pile.propTypes = {
+  cards: PropTypes.array
+};

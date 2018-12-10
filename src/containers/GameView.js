@@ -31,7 +31,7 @@ export class GameView extends Component {
 
   takeCards() {
     this.props.takeCards(this.props.gameState.cardsToTake);
-    this.props.playSound('take_card');
+    this.props.playSound("take_card");
     this.props.endTurn();
   }
 
@@ -42,16 +42,8 @@ export class GameView extends Component {
 
   render() {
     const gameState = this.props.gameState,
-      pileTopCard = gameState.pile[gameState.pile.length - 1],
-      playerCanWait =
-        (pileTopCard.type === "4" && gameState.waitTurn) ||
-        gameState.player.wait
-          ? true
-          : false,
-      playerCanMove =
-        (!gameState.player.wait ||
-          (pileTopCard.type === "4" && !gameState.cpuPlayer.wait)) &&
-        !playerCanWait;
+    playerCanMove = !gameState.player.wait && !gameState.waitTurn ? true : false,
+    { pile } = gameState;
 
     const confettiConfig = {
       angle: 90,
@@ -72,9 +64,9 @@ export class GameView extends Component {
         </div>
         <Header />
         <CpuPlayer cpuPlayer={gameState.cpuPlayer} />
-        <div className="flex-container">
+        <div className="flex-container middle">
           <Deck takeCard={this.takeCards} playerCanMove={playerCanMove} />
-          <Pile cardOnTop={pileTopCard} />
+          <Pile cards={pile} />
           <Icons />
         </div>
         <Player />

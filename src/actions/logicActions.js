@@ -61,7 +61,11 @@ export function updateCpuCards(cards) {
 export function shuffleDeck() {
   return function(dispatch, getState) {
     const { pile } = getState().gameState;
-    let cardsForShuffle = _.cloneDeep(pile)
+    let cardsForShuffle = _.cloneDeep(pile);
+    cardsForShuffle = cardsForShuffle.map(card => {
+      card = _.omit(card, "transform");
+      return card;
+    });
     cardsForShuffle.pop();
     let shuffledCards = _.shuffle(cardsForShuffle);
     dispatch({
@@ -86,11 +90,43 @@ export function waitTurns(who) {
 
 export function addToPile(cards) {
   return dispatch => {
+    cards = getRandomTransformValues(cards);
     dispatch({
       type: "ADD_TO_PILE",
       cards: cards
     });
   };
+}
+
+export function getRandomTransformValues(cards) {
+  const getRandomPlusMinusSign = () => {
+    const randomBool = Math.random() >= 0.5;
+    return randomBool ? "" : "-";
+  };
+
+  const getRandomValue = () => Math.floor(Math.random() * 10) + 1;
+
+  cards.map((card, idx) => {
+    if (idx === 0) {
+      (card.transform = {
+        rotate: getRandomPlusMinusSign() + getRandomValue(),
+        x: getRandomPlusMinusSign() + getRandomValue(),
+        y: getRandomPlusMinusSign() + getRandomValue()
+      });
+      if (card.transform.rotate > 5 && cards.length > 1) {
+        card.transform.rotate -= 5;
+      }
+      return card;
+    } else
+      return (card.transform = {
+        rotate: parseInt(cards[0].transform.rotate) + 10*idx,
+        x: parseInt(cards[0].transform.x) + 10*idx,
+        y: parseInt(cards[0].transform.y) - 3*idx
+      });
+  });
+  debugger;
+
+  return cards;
 }
 
 export function checkMacaoAndWin() {
@@ -117,17 +153,14 @@ export function checkMacao(gameState) {
 
 export function checkWin(gameState) {
   return dispatch => {
-    if (
-      !gameState.player.cards.length ||
-      !gameState.cpuPlayer.cards.length
-    )
+    if (!gameState.player.cards.length || !gameState.cpuPlayer.cards.length)
       dispatch({ type: "SHOW_MODAL", modal: "gameOver" });
   };
 }
 
 export function takeCards(who) {
   return function(dispatch, getState) {
-      const gameState = getState().gameState;
+    const gameState = getState().gameState;
     let howMany = gameState.cardsToTake - 1;
     if (!howMany) howMany = 1;
 
@@ -149,7 +182,8 @@ export function takeCards(who) {
     else dispatch(updateCpuCards(newCardsWithTakenCards));
 
     if (gameState.cardsToTake > 1) dispatch(updateGameFactor("cardsToTake", 1));
-    if (gameState.jackActive ) dispatch(updateGameFactor("jackActive", gameState.jackActive - 1));
+    if (gameState.jackActive)
+      dispatch(updateGameFactor("jackActive", gameState.jackActive - 1));
     if (gameState.battleCardActive)
       dispatch(updateGameFactor("battleCardActive", false));
   };

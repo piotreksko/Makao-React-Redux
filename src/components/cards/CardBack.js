@@ -9,10 +9,9 @@ const card = props => {
   };
   const cardClasses = classNames({
     card: true,
-    available: !props.playerCanMove && props.deckCard,
     deckPossible: props.playerCanMove && props.deckCard,
     cardsInHand: !props.deckCard,
-    'mr-2': props.deckCard
+    'mr-5': props.deckCard
   });
   return <div className={cardClasses} onClick={props.playerCanMove && props.deckCard ? props.takeCard : null} style={cardStyle} />;
 };

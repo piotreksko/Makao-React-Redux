@@ -178,9 +178,8 @@ body {
   margin-right: -15px;
   margin-left: -15px;
 }
-#deck {
-  margin-right: 1%;
-  background-image: url("https://bfa.github.io/solitaire-js/img/card_back_bg.png");
+.middle {
+  transform: translateX(-3rem);
 }
 .buttons {
   text-align: center;
@@ -236,14 +235,14 @@ button {
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center center;
+  transform: translate(12rem, 3rem);
   width: 50px;
   height: 50px;
   margin-left: 2rem;
-  margin-top: 3rem;
 }
 .player-wait-icon {
   position: absolute;
-  margin-left: 6rem !important;
+  transform: translateX(6rem);
 }
 .icon {
   border-radius: 10px;
@@ -383,6 +382,7 @@ fieldset {
 .cards-container {
   min-height: 170px;
   margin: 2rem 0;
+  transform: translateX(2rem);
 }
 
 #reset {

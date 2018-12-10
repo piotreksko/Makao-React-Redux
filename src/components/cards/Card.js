@@ -12,6 +12,14 @@ const Card = props => {
     backgroundImage: "url(" + img + ")"
   };
 
+  if (props.fromPile) {
+    cardStyle.position = "absolute";
+    if (props.card.transform) {
+      const { rotate, x, y } = props.card.transform;
+      cardStyle.transform = `rotate(${rotate}deg) translate(${x}px, ${y}px)`;
+    }
+  }
+
   return (
     <div
       onClick={
