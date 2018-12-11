@@ -13,14 +13,14 @@ WORK in progress
 
 * Fix bugs introduced in last commit
 * Working stats tracking
-* More Animations
-* Sound effects
+* Improve components lifecycles
 * Tests
 * Improve and refactor AI algorithm
 * More features e.g. more AI players
 
+## [Live Demo ](https://makao-react.firebaseapp.com/)
+
 Reweritten from a jQuery version - https://github.com/piotreksko/Makao
-## [Live Demo of Original version](https://makao-win-counter.firebaseapp.com/)
 
 ![Demo](demo.gif)
 
