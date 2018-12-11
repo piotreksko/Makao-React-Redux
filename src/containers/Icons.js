@@ -10,16 +10,14 @@ const Icons = props => {
   const gameState = props.gameState,
     modals = props.modals;
 
-  return (
+  return !modals.gameOver ? (
     <Aux>
       <BattleIcon
         battleCards={gameState.cardsToTake}
-        gameOver={gameState.gameOver}
       />
       <DemandIcon
         jackActive={gameState.jackActive && !modals.jack}
         chosenType={gameState.chosenType}
-        gameOver={gameState.gameOver}
       />
       <SuitIcon
         show={
@@ -35,7 +33,7 @@ const Icons = props => {
         playerIcon={true}
       />
     </Aux>
-  );
+  ) : null;
 };
 
 const mapStateToProps = state => {

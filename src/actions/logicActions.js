@@ -316,7 +316,6 @@ function getAvailableCards() {
     const cards = cpuPlayer.cards;
 
     let availableCards = [];
-
     if (pileTopCard.type === "ace") {
       availableCards = cards.filter(
         card => card.weight === chosenWeight || card.type === pileTopCard.type
@@ -566,7 +565,6 @@ function checkCardsToUse(availableCards) {
         return 0;
       }
     }
-
     const neutralValue = getNeutralValue();
     const battleValue = getBattleValue();
     const foursValue = getFoursValue();
@@ -607,11 +605,11 @@ function checkCardsToUse(availableCards) {
       cardsToUse = battleCards;
     } else if (randomNumber < ranges.fours) {
       cardsToUse = fours;
-    } else if (randomNumber < ranges.fours) {
-      cardsToUse = jacks;
     } else if (randomNumber < ranges.jacks) {
+      cardsToUse = jacks;
+    } else if (randomNumber < ranges.aces) {
       cardsToUse = aces;
-    } else if (randomNumber < ranges.kinds) {
+    } else if (randomNumber < ranges.kings) {
       cardsToUse = kings;
     }
 
@@ -701,11 +699,13 @@ function verifyCardsFromAI(cardsToUse) {
       chosenType,
       chosenWeight
     };
-
     const cpuCards = cpuPlayer.cards;
     let newCpuCards = _.cloneDeep(cpuPlayer.cards);
-    let allNeutralCards = getNeutralCards(cpuCards);
+    let allNeutralCards = getSameTypeAndWeightAmount(getNeutralCards(cpuCards), cpuCards);
     let mostMovesCard = getCardWithMostMoves(cardsToUse);
+
+    // Bool to use if cpu has more than 1 jack to use
+    let cardDemandAlreadyChanged = false;
 
     cardsToUse.forEach(card => {
       let notCheckedYet = true;
@@ -720,22 +720,25 @@ function verifyCardsFromAI(cardsToUse) {
           gameFactors.waitTurn += 1;
           break;
         case "jack":
-          if (allNeutralCards.length) {
-            for (let i = 0; i < 2; i++) {
-              let index = allNeutralCards.findIndex(x => x.type === "king");
-              if (index !== -1)
-                allNeutralCards = allNeutralCards.slice(index, 1);
-              else i = 2;
+          if (!cardDemandAlreadyChanged) {
+            if (allNeutralCards.length) {
+              for (let i = 0; i < 2; i++) {
+                let index = allNeutralCards.findIndex(x => x.type === "king");
+                if (index !== -1)
+                  allNeutralCards = allNeutralCards.slice(index, 1);
+                else i = 2;
+              }
+              if (allNeutralCards.length)
+                gameFactors.chosenType = allNeutralCards.reduce((prev, curr) =>
+                  prev.sameTypeAmount < curr.sameTypeAmount ? prev : curr
+                ).type;
+              else gameFactors.chosenType = null;
             }
-            if (allNeutralCards.length)
-              gameFactors.chosenType = allNeutralCards.reduce((prev, curr) =>
-                prev.sameTypeAmount < curr.sameTypeAmount ? prev : curr
-              ).type;
-            else gameFactors.chosenType = null;
+            gameFactors.chosenType
+              ? (gameFactors.jackActive = 3)
+              : (gameFactors.jackActive = 0);
+            cardDemandAlreadyChanged = true;
           }
-          gameFactors.chosenType
-            ? (gameFactors.jackActive = 2)
-            : (gameFactors.jackActive = 0);
           break;
         case "ace":
           if (notCheckedYet) {
