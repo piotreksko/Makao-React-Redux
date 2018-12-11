@@ -108,24 +108,22 @@ export function getRandomTransformValues(cards) {
 
   cards.map((card, idx) => {
     if (idx === 0) {
-      (card.transform = {
+      card.transform = {
         rotate: getRandomPlusMinusSign() + getRandomValue(),
         x: getRandomPlusMinusSign() + getRandomValue(),
         y: getRandomPlusMinusSign() + getRandomValue()
-      });
+      };
       if (card.transform.rotate > 5 && cards.length > 1) {
         card.transform.rotate -= 5;
       }
       return card;
     } else
       return (card.transform = {
-        rotate: parseInt(cards[0].transform.rotate) + 10*idx,
-        x: parseInt(cards[0].transform.x) + 10*idx,
-        y: parseInt(cards[0].transform.y) - 3*idx
+        rotate: parseInt(cards[0].transform.rotate) + 10 * idx,
+        x: parseInt(cards[0].transform.x) + 10 * idx,
+        y: parseInt(cards[0].transform.y) - 3 * idx
       });
   });
-  debugger;
-
   return cards;
 }
 
@@ -153,8 +151,13 @@ export function checkMacao(gameState) {
 
 export function checkWin(gameState) {
   return dispatch => {
-    if (!gameState.player.cards.length || !gameState.cpuPlayer.cards.length)
+    if (!gameState.player.cards.length) {
       dispatch({ type: "SHOW_MODAL", modal: "gameOver" });
+      dispatch(playSound("victory"));
+    } else if (!gameState.cpuPlayer.cards.length) {
+      dispatch({ type: "SHOW_MODAL", modal: "gameOver" });
+      dispatch(playSound("defeat"));
+    }
   };
 }
 
@@ -312,7 +315,7 @@ function getAvailableCards() {
     const pileTopCard = pile[pile.length - 1];
     const cards = cpuPlayer.cards;
 
-    let availableCards;
+    let availableCards = [];
 
     if (pileTopCard.type === "ace") {
       availableCards = cards.filter(
@@ -339,6 +342,7 @@ function hasCardsAvailable(availableCards) {
     if (!cardsToUse) {
       return dispatch(noCardsToUse());
     } else {
+      if (!cardsToUse.length) return dispatch(noCardsToUse());
       cardsToUse = dispatch(setBestTopCard(cardsToUse));
 
       let newCpuCards = dispatch(verifyCardsFromAI(cardsToUse));
@@ -428,15 +432,13 @@ function getBattleCards(cards) {
 function getCardsDifferenceBetweenPlayers() {
   return function(dispatch, getState) {
     const gameState = getState().gameState;
-    const cpuCards = gameState.cpuPlayer.cards;
-    const playerCards = gameState.player.cards;
+    const cpuCardsLength = gameState.cpuPlayer.cards.length;
+    const playerCardsLength = gameState.player.cards.length;
 
-    if (cpuCards.length - playerCards.length > 0) {
-      return cpuCards.length - playerCards.length;
-    } else if (cpuCards.length === playerCards.length) {
-      return 1;
+    if (cpuCardsLength - playerCardsLength > 0) {
+      return cpuCardsLength - playerCardsLength;
     } else {
-      return 0;
+      return 1;
     }
   };
 }
@@ -456,9 +458,8 @@ function checkCardsToUse(availableCards) {
       availableCards,
       cpuCards
     );
-
     let neutralCards = getNeutralCards(cpuCardsTypeAndWeight);
-    let battleCards = getBattleCards(cpuCards);
+    let battleCards = getBattleCards(cpuCardsTypeAndWeight);
     let fours = cpuCardsTypeAndWeight.filter(card => card.type === "4");
     let jacks = cpuCardsTypeAndWeight.filter(card => card.type === "jack");
     let aces = cpuCardsTypeAndWeight.filter(card => card.type === "ace");
@@ -568,10 +569,10 @@ function checkCardsToUse(availableCards) {
 
     const neutralValue = getNeutralValue();
     const battleValue = getBattleValue();
-    const foursValue = getBattleValue();
-    const jacksValue = getBattleValue();
-    const acesValue = getBattleValue();
-    const kingsValue = getBattleValue();
+    const foursValue = getFoursValue();
+    const jacksValue = getJacksValue();
+    const acesValue = getAcesValue();
+    const kingsValue = getKingsValue();
 
     let min = 0;
     let max =

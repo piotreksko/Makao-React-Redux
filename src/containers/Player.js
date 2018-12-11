@@ -43,6 +43,7 @@ class Player extends Component {
   }
 
   waitTurns = () => {
+    this.props.playSound("click");
     this.props.playerWait();
     this.props.endTurn();
   };
@@ -104,7 +105,7 @@ class Player extends Component {
 
   confirmCards = () => {
     if (!this.state.selectedCards.length) return;
-    this.props.playSound('click')
+    this.props.playSound("click");
     const { makePlayerMove } = this.props;
     makePlayerMove(this.state.selectedCards);
     this.setState({
@@ -138,7 +139,7 @@ class Player extends Component {
     } = this.props.gameState;
     const playerCards = player.cards;
 
-    let pileTopCard = pile[pile.length - 1],
+    let pileTopCard = _.cloneDeep(pile[pile.length - 1]),
       newAvailable = [],
       newPossible = [];
 
@@ -149,9 +150,10 @@ class Player extends Component {
     playerCards.forEach((card, idx) => {
       // Make battle cards available if battle is on
       if (battleCardActive) {
-        return newAvailable.concat(
-          this.getBattleCards(card, idx, playerCards, pileTopCard)
-        );
+        return (newAvailable = [
+          ...newAvailable,
+          ...this.getBattleCards(card, idx, playerCards, pileTopCard)
+        ]);
       }
 
       // Make 4 available if it was used
@@ -161,7 +163,10 @@ class Player extends Component {
 
       // Jack demand is active
       if (jackActive) {
-        return card.type === chosenType || (card.type === 'jack' && pileTopCard.type === 'jack') ? newAvailable.push(playerCards[idx]) : null;
+        return card.type === chosenType ||
+          (card.type === "jack" && pileTopCard.type === "jack")
+          ? newAvailable.push(playerCards[idx])
+          : null;
       }
 
       // No special conditions
@@ -179,6 +184,7 @@ class Player extends Component {
   };
 
   getBattleCards = (card, idx, playerCards, pileTopCard, newAvailable = []) => {
+
     // Battle cards are 2, 3, king of spades and hearts
     if (
       card.type === pileTopCard.type ||
@@ -209,7 +215,7 @@ class Player extends Component {
     } = this.props.gameState;
     const playerCards = player.cards;
 
-    let pileTopCard = pile[pile.length - 1],
+    let pileTopCard = _.cloneDeep(pile[pile.length - 1]),
       newAvailable = [],
       newPossible = [];
 
