@@ -137,11 +137,6 @@ export default function(state = initialState(), action) {
         ...state,
         [action.factor]: action.value
       };
-    case FETCH_STATS:
-      return {
-        ...state,
-        items: action.payload
-      };
     case RESTART_GAME:
       return initialState();
     default:

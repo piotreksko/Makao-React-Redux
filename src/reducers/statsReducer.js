@@ -1,16 +1,16 @@
 import {
   FETCH_STATS
-} from "../actions/statActions";
+} from "../actions/statsActions";
 
 const initialState = {
   current: {
-    movesCount: -1,
-    playerWinCounter: 0,
-    cpuWinCounter: 0
+    movesCount: 0,
+    playerWinCount: 0,
+    computerWinCount: 0
   },
   global: {
-    totalPlayerWinCount: 0,
-    totalComputerWinCount: 0,
+    playerWinCount: 0,
+    computerWinCount: 0,
     totalMovesCount: 0,
     macaoCallCount: 0
   }
@@ -19,10 +19,9 @@ const initialState = {
 export default function(state = initialState, action) {
   switch (action.type) {
     case FETCH_STATS:
-      return {
-        ...state,
-        items: action.payload
-      };
+      return { ...state,
+        global: action.payload
+      }
     default:
       return state;
   }

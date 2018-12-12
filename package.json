@@ -49,6 +49,7 @@
     "react-dom-confetti": "0.0.10",
     "react-modal": "^3.6.1",
     "react-redux": "^5.0.7",
+    "react-redux-firebase": "^2.2.4",
     "react-sound": "^1.2.0",
     "redux": "^4.0.1",
     "redux-sounds": "^3.0.1",
