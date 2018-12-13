@@ -1,3 +1,43 @@
+@mixin box-shadow($top, $left, $blur, $spread, $color, $inset: false) {
+  @if $inset {
+    -webkit-box-shadow: $top $left $blur $spread $color inset;
+    -moz-box-shadow: $top $left $blur $spread $color inset;
+    box-shadow: $top $left $blur $spread $color inset;
+  } @else {
+    -webkit-box-shadow: $top $left $blur $spread $color;
+    -moz-box-shadow: $top $left $blur $spread $color;
+    box-shadow: $top $left $blur $spread $color;
+  }
+}
+
+@mixin transition($transition...) {
+  -moz-transition: $transition;
+  -o-transition: $transition;
+  -webkit-transition: $transition;
+  transition: $transition;
+}
+
+@mixin transform($transforms) {
+  -moz-transform: $transforms;
+  -o-transform: $transforms;
+  -ms-transform: $transforms;
+  -webkit-transform: $transforms;
+  transform: $transforms;
+}
+
+@mixin rounded($radius: 0.5em) {
+  -webkit-border-radius: $radius;
+  -moz-border-radius: $radius;
+  border-radius: $radius;
+}
+
+%hoverable-card {
+  @include transition(0.3s);
+  @include transform(translate(0px, -15px));
+  @include box-shadow(0px, 0px, 5px, 1px, black);
+  cursor: pointer;
+}
+
 body {
   margin-top: 60px;
   margin-left: 20px;
@@ -38,7 +78,7 @@ body {
   overflow: auto;
   max-width: 800px;
   padding: 10px;
-  border-radius: 10px;
+  @include rounded(10px);
   min-width: 80%;
   h1 {
     text-align: center;
@@ -63,6 +103,7 @@ body {
   }
 
   i {
+    @include rounded(5px);
     cursor: pointer;
     display: block;
     float: right;
@@ -71,7 +112,6 @@ body {
     color: #999;
     background-color: #333;
     padding: 4px 10px;
-    border-radius: 5px;
     margin: 5px 6px 10px;
     line-height: 1em;
   }
@@ -125,42 +165,21 @@ body {
 }
 .available {
   &:hover {
-    cursor: pointer;
-    -webkit-transform: translate(0px, -15px);
-    box-shadow: 0px 0px 5px 1px black;
-    -webkit-transition: all 0.3s;
-    -moz-transition: all 0.3s;
-    transition: all 0.3s;
+    @extend %hoverable-card;
   }
-  -webkit-box-shadow: 0px 0px 3px 3px rgba(204, 255, 51, 0.9);
-  -moz-box-shadow: 0px 0px 3px 3px rgba(204, 255, 51, 0.9);
-  box-shadow: 0px 0px 3px 3px rgba(204, 255, 51, 0.9);
+  @include box-shadow(0px, 0px, 3px, 3px, rgba(204, 255, 51, 0.9));
 }
 .possible {
   &:hover {
-    cursor: pointer;
-    -webkit-transform: translate(0px, -15px);
-    box-shadow: 0px 0px 5px 1px black;
-    -webkit-transition: all 0.3s;
-    -moz-transition: all 0.3s;
-    transition: all 0.3s;
+    @extend %hoverable-card;
   }
-  -webkit-box-shadow: 0px 0px 3px 3px rgba(52, 152, 218, 0.9);
-  -moz-box-shadow: 0px 0px 3px 3px rgba(52, 152, 218, 0.9);
-  box-shadow: 0px 0px 3px 3px rgba(52, 152, 218, 0.9);
+  @include box-shadow(0px, 0px, 3px, 3px, rgba(52, 152, 218, 0.9));
 }
 .deckPossible {
   &:hover {
-    cursor: pointer;
-    -webkit-transform: translate(0px, -10px);
-    box-shadow: 0px 0px 5px 1px black;
-    -webkit-transition: all 0.3s;
-    -moz-transition: all 0.3s;
-    transition: all 0.3s;
+    @extend %hoverable-card;
   }
-  -webkit-box-shadow: 0px 0px 3px 3px rgba(102, 51, 153, 0.9);
-  -moz-box-shadow: 0px 0px 3px 3px rgba(102, 51, 153, 0.9);
-  box-shadow: 0px 0px 3px 3px rgba(102, 51, 153, 0.9);
+  @include box-shadow(0px, 0px, 3px, 3px, rgba(102, 51, 153, 0.9));
 }
 .selected {
   bottom: 30px;
@@ -191,12 +210,8 @@ button {
   overflow: auto;
 }
 .topCard {
-  -webkit-transition: all 0.5s;
-  -moz-transition: all 0.5s;
-  transition: all 0.5s;
-  -webkit-box-shadow: 0px 0px 4px 4px rgba(255, 127, 80, 0.9) !important;
-  -moz-box-shadow: 0px 0px 4px 4px rgba(255, 127, 80, 0.9) !important;
-  box-shadow: 0px 0px 4px 4px rgba(255, 127, 80, 0.9) !important;
+  @include box-shadow(0px, 0px, 3px, 3px, rgba(255, 127, 80, 0.9) !important);
+  @include transition(0.5s);
   &:hover {
     color: #ff113c;
     -webkit-animation: none;
@@ -245,7 +260,7 @@ button {
   transform: translateX(6rem);
 }
 .icon {
-  border-radius: 10px;
+  @include rounded(10px);
   text-align: center;
   position: relative;
   margin: auto;
@@ -256,27 +271,26 @@ button {
   @extend .icon;
   color: #fff;
   background-color: rgba(255, 10, 0, 0.6);
- }
+}
 .orange-icon {
- @extend .icon;
- background-color: rgba(255, 150, 0, 1);
- border: 1px solid #000;
- color: #000;
- font-weight: bold;
- left: 2px;
- border-radius: 0;
- top: 0 !important;
+  @extend .icon;
+  background-color: rgba(255, 150, 0, 1);
+  border: 1px solid #000;
+  color: #000;
+  font-weight: bold;
+  left: 2px;
+  top: 0 !important;
 }
 .grey-icon {
   @extend .icon;
   background-color: rgba(220, 220, 220, 0.6);
   left: 100%;
- }
- .blue-icon {
+}
+.blue-icon {
   @extend .icon;
   background-color: rgba(59, 72, 255, 0.6);
   color: #fff;
- }
+}
 .modal-shown {
   opacity: 0.96;
   transition: all 300ms linear;
@@ -288,6 +302,8 @@ button {
   visibility: hidden;
 }
 .suit-popup {
+  @include rounded(3px);
+  @include box-shadow(0px, 0px, 20px, 0, #999 !important);
   min-width: 300px;
   background: #333;
   padding: 10px;
@@ -299,12 +315,6 @@ button {
   top: 40%;
   left: 50%;
   z-index: 99999;
-  box-shadow: 0px 0px 20px #999;
-  -moz-box-shadow: 0px 0px 20px #999;
-  -webkit-box-shadow: 0px 0px 20px #999;
-  border-radius: 3px 3px 3px 3px;
-  -moz-border-radius: 3px;
-  -webkit-border-radius: 3px;
   overflow: hidden;
 
   span,
@@ -322,11 +332,9 @@ fieldset {
   border: none;
 }
 .suit-icon {
+  @include rounded(5px);
   width: 40px;
   height: 40px;
-  -webkit-border-radius: 5px;
-  -moz-border-radius: 5px;
-  border-radius: 5px;
   border: 1px solid #333;
   background-color: white;
   cursor: pointer;
@@ -337,11 +345,9 @@ fieldset {
   }
 }
 .rules-icon {
+  @include rounded(5px);
   width: 40px !important;
   height: 40px;
-  -webkit-border-radius: 5px;
-  -moz-border-radius: 5px;
-  border-radius: 5px;
   border: 0;
   background: rgba(0, 0, 0, 0.1);
   cursor: pointer;

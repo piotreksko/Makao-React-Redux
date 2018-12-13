@@ -52,7 +52,7 @@ export class Header extends Component {
         <RulesButton onClick={this.toggleRules} />
         <div className="moves-count" data-moves={0}>
           <label>Moves:</label>
-          <span id="moves-count"> {this.props.currentStats.movesCount}</span>
+          <span id="moves-count"> {this.props.localStats.movesCount}</span>
         </div>
         <div className="message">
           <label>Message:</label>
@@ -60,29 +60,29 @@ export class Header extends Component {
         <div className="global-stats">
           <h6>Global statistics</h6>
           <div className="score">
-            <label>Macao call count:</label>
-            <span id="macao-call-counter"> {this.props.globalStats.macaoCallCount}</span>
+            <label>Makao call count:</label>
+            <span> {this.props.globalStats.makaoCallCount}</span>
           </div>
           <div className="score">
             <label>Total player score:</label>
-            <span id="total-player-win-counter"> {this.props.globalStats.playerWinCount}</span>
+            <span> {this.props.globalStats.playerWinCount}</span>
           </div>
           <div className="score">
             <label>Total computer score:</label>
-            <span id="total-cpu-win-counter"> {this.props.globalStats.computerWinCount}</span>
+            <span> {this.props.globalStats.computerWinCount}</span>
           </div>
           <div className="total-moves-counter" data-moves={0}>
             <label>Total moves:</label>
-            <span id="total-moves-counter"> {this.props.globalStats.totalMovesCount}</span>
+            <span> {this.props.globalStats.movesCount}</span>
           </div>
         </div>
         <div className="score">
           <label>Computer score:</label>
-          <span id="cpu-win-counter"> {this.props.currentStats.computerWinCount}</span>
+          <span> {this.props.localStats.computerWinCount}</span>
         </div>
         <div className="score">
           <label>Your score:</label>
-          <span id="player-win-counter"> {this.props.currentStats.playerWinCount}</span>
+          <span> {this.props.localStats.playerWinCount}</span>
         </div>
       </div>
     );
@@ -92,7 +92,7 @@ export class Header extends Component {
 const mapStateToProps = state => {
   return {
     globalStats: state.stats.global,
-    currentStats: state.stats.current,
+    localStats: state.stats.local,
     modals: state.modals,
     gameState: state.gameState
   };
@@ -101,6 +101,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return {
     fetchStats: () => dispatch(statsActions.fetchStats()),
+    updateLocalStat: (stat, value) => dispatch(statsActions.updateLocalStat(stat, value)),
     restartGame: () => dispatch({ type: logicActions.RESTART_GAME }),
     playSound: soundName => dispatch(soundActions.playSound(soundName))
   };

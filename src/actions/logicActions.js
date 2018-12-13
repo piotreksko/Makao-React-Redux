@@ -1,5 +1,6 @@
 import _ from "lodash";
 import { sortCards } from "../utility/utility";
+import * as statsActions from './statsActions';
 import { checkSoundsToPlay, playSound } from "./soundActions";
 export const UPDATE_PLAYER_CARDS = "UPDATE_PLAYER_CARDS";
 export const UPDATE_CPU_CARDS = "UPDATE_CPU_CARDS";
@@ -79,6 +80,10 @@ export function shuffleDeck() {
 export function waitTurns(who) {
   return function(dispatch, getState) {
     const gameState = getState().gameState;
+
+    dispatch(statsActions.updateLocalStat('movesCount'));
+    dispatch(statsActions.updateGlobalStat('movesCount'));
+
     if (gameState.waitTurn) {
       dispatch(updateGameFactor("waitTurn", 0));
       dispatch({ type: "WAIT_TURNS", waitTurns: gameState.waitTurn - 1, who });
@@ -89,7 +94,11 @@ export function waitTurns(who) {
 }
 
 export function addToPile(cards) {
-  return dispatch => {
+  return (dispatch, getState) => {
+    debugger;
+    dispatch(statsActions.updateLocalStat('movesCount'));
+    dispatch(statsActions.updateGlobalStat('movesCount'));
+
     cards = getRandomTransformValues(cards);
     dispatch({
       type: "ADD_TO_PILE",
@@ -136,11 +145,13 @@ export function checkMacaoAndWin() {
 }
 
 export function checkMacao(gameState) {
-  return dispatch => {
+  return (dispatch, getState) => {
     if (
       gameState.player.cards.length === 1 ||
       gameState.cpuPlayer.cards.length === 1
     ) {
+
+      dispatch(statsActions.updateGlobalStat('makaoCallCount'));
       dispatch({ type: "SHOW_MODAL", modal: "macao" });
       setTimeout(() => {
         dispatch({ type: "HIDE_MODAL", modal: "macao" });
@@ -150,13 +161,17 @@ export function checkMacao(gameState) {
 }
 
 export function checkWin(gameState) {
-  return dispatch => {
+  return (dispatch, getState) => {
     if (!gameState.player.cards.length) {
       dispatch({ type: "SHOW_MODAL", modal: "gameOver" });
       dispatch(playSound("victory"));
+      dispatch(statsActions.updateLocalStat('playerWinCount'));
+      dispatch(statsActions.updateGlobalStat('playerWinCount'));
     } else if (!gameState.cpuPlayer.cards.length) {
       dispatch({ type: "SHOW_MODAL", modal: "gameOver" });
       dispatch(playSound("defeat"));
+      dispatch(statsActions.updateLocalStat('computerWinCount'));
+      dispatch(statsActions.updateGlobalStat('computerWinCount'));
     }
   };
 }
@@ -164,6 +179,10 @@ export function checkWin(gameState) {
 export function takeCards(who) {
   return function(dispatch, getState) {
     const gameState = getState().gameState;
+
+    dispatch(statsActions.updateLocalStat('movesCount'));
+    dispatch(statsActions.updateGlobalStat('movesCount'));
+
     let howMany = gameState.cardsToTake - 1;
     if (!howMany) howMany = 1;
 
