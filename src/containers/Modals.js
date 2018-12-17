@@ -9,8 +9,17 @@ import DemandCardModal from "../components/modals/DemandCardModal";
 import GameOverModal from "../components/modals/GameOverModal";
 import MacaoModal from "../components/modals/MacaoModal";
 import WhoStartsModal from "../components/modals/WhoStartsModal";
+import _ from 'lodash';
 
 export class Modals extends Component {
+
+  shouldComponentUpdate(nextProps, nextState) {
+    const modalsChanged = _.isEqual(nextProps.modals, this.props.modals);
+
+    if (modalsChanged) return true;
+    else return false;
+  }
+  
   changeSuit = weight => {
     this.props.updateGameFactor("chosenWeight", weight);
     this.props.hideModal("ace");
@@ -89,7 +98,6 @@ const mapDispatchToProps = dispatch => {
     updateGameFactor: (factor, value) =>
       dispatch(logicActions.updateGameFactor(factor, value)),
     endTurn: () => {
-      dispatch(logicActions.updateGameFactor("playerTurn", false));
       dispatch(logicActions.makeCpuMove());
       dispatch(logicActions.checkMacaoAndWin());
     },

@@ -19,7 +19,7 @@ const initialState = {
 export default function(state = initialState, action) {
   switch (action.type) {
     case FETCH_STATS:
-      return { ...state, global: action.payload };
+    return { ...state, global: action.payload };
     case UPDATE_GLOBAL_STAT:
       return {
         ...state,

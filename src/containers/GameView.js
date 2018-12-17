@@ -11,6 +11,7 @@ import Deck from "../components/Deck";
 import Pile from "../components/Pile";
 import Confetti from "react-dom-confetti";
 import CpuPlayer from "../components/CpuPlayer";
+import _ from "lodash";
 
 export class GameView extends Component {
   constructor(props) {
@@ -29,6 +30,18 @@ export class GameView extends Component {
     }, 1000);
   }
 
+  // shouldComponentUpdate(nextProps, nextState) {
+  //   debugger;
+  //   const cpuEndedMove = _.isEqual(
+  //     nextProps.gameState.cpuPlayer,
+  //     this.props.gameState.cpuPlayer
+  //   );
+
+  //   if (cpuEndedMove) {
+  //     return true;
+  //   } else return false;
+  // }
+
   takeCards() {
     this.props.playSound("take_card");
     this.props.takeCards(this.props.gameState.cardsToTake);
@@ -43,8 +56,9 @@ export class GameView extends Component {
 
   render() {
     const gameState = this.props.gameState,
-    playerCanMove = !gameState.player.wait && !gameState.waitTurn ? true : false,
-    { pile } = gameState;
+      playerCanMove =
+        !gameState.player.wait && !gameState.waitTurn ? true : false,
+      { pile } = gameState;
 
     const confettiConfig = {
       angle: 90,
@@ -78,8 +92,7 @@ export class GameView extends Component {
 
 const mapStateToProps = state => {
   return {
-    globalStats: state.stats.global,
-    currentStats: state.stats.current,
+    stats: state.stats,
     modals: state.modals,
     gameState: state.gameState
   };

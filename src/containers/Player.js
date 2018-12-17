@@ -42,6 +42,13 @@ class Player extends Component {
       this.checkAvailableCards();
   }
 
+  // shouldComponentUpdate(nextProps, nextState) {
+  //   const cardsChanged = _.isEqual(nextProps.gameState.player.cards, nextProps.gameState.player.cards);
+
+  //   if (cardsChanged) return true;
+  //   else return false;
+  // }
+  
   waitTurns = () => {
     this.props.playSound("click");
     this.props.playerWait();

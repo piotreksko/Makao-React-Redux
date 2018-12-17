@@ -95,7 +95,6 @@ export function waitTurns(who) {
 
 export function addToPile(cards) {
   return (dispatch, getState) => {
-    debugger;
     dispatch(statsActions.updateLocalStat('movesCount'));
     dispatch(statsActions.updateGlobalStat('movesCount'));
 
@@ -179,13 +178,12 @@ export function checkWin(gameState) {
 export function takeCards(who) {
   return function(dispatch, getState) {
     const gameState = getState().gameState;
-
     dispatch(statsActions.updateLocalStat('movesCount'));
     dispatch(statsActions.updateGlobalStat('movesCount'));
-
+    
     let howMany = gameState.cardsToTake - 1;
     if (!howMany) howMany = 1;
-
+    
     // Check if there are enough cards on deck
     let deck = gameState.deck;
     if (deck.length < howMany) {
@@ -193,16 +191,16 @@ export function takeCards(who) {
       deck = getState().gameState.deck;
     }
     dispatch({ type: "TAKE_FROM_DECK", howMany });
-
+    
     const cardsToTake = deck.slice(deck.length - howMany, deck.length);
     let newCardsWithTakenCards = sortCards([
       ...cardsToTake,
       ..._.cloneDeep(gameState[who].cards)
     ]);
-
+    
     if (who === "player") dispatch(updatePlayerCards(newCardsWithTakenCards));
     else dispatch(updateCpuCards(newCardsWithTakenCards));
-
+    
     if (gameState.cardsToTake > 1) dispatch(updateGameFactor("cardsToTake", 1));
     if (gameState.jackActive)
       dispatch(updateGameFactor("jackActive", gameState.jackActive - 1));
@@ -296,14 +294,13 @@ function verifyUsedCards(cards) {
 function checkGameFactorsToUpdate(gameFactors) {
   return function(dispatch, getState) {
     const gameState = getState().gameState;
-
     if (gameFactors.cardsToTake > 1) gameFactors.battleCardActive = true;
     else gameFactors.battleCardActive = false;
 
     if (gameFactors.jackActive) gameFactors.jackActive -= 1;
 
     _.forOwn(gameFactors, function(value, key) {
-      if (value !== gameState[key] && value)
+      if (value !== gameState[key])
         dispatch(updateGameFactor(key, value));
     });
   };
@@ -753,6 +750,7 @@ function verifyCardsFromAI(cardsToUse) {
                 ).type;
               else gameFactors.chosenType = null;
             }
+            debugger;
             gameFactors.chosenType
               ? (gameFactors.jackActive = 3)
               : (gameFactors.jackActive = 0);
