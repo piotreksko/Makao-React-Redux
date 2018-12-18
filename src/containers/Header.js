@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { PureComponent } from "react";
 import { connect } from "react-redux";
 import * as logicActions from "../actions/logicActions";
 import * as soundActions from "../actions/soundActions";
@@ -8,7 +8,7 @@ import RulesButton from "../components/buttons/RulesButton";
 import RestartButton from "../components/buttons/RestartButton";
 import ReactModal from "react-modal";
 
-export class Header extends Component {
+export class Header extends PureComponent {
   constructor(props) {
     super(props);
 
@@ -18,7 +18,6 @@ export class Header extends Component {
   }
 
   componentDidMount () {
-    this.props.playSound('click');
     this.props.fetchStats();
   }
 
@@ -36,7 +35,7 @@ export class Header extends Component {
 
   render() {
     return (
-      <div id="score">
+      <div className="score-board">
         <ReactModal
           isOpen={this.state.openRules}
           shouldCloseOnOverlayClick={true}
@@ -50,7 +49,7 @@ export class Header extends Component {
         </ReactModal>
         <RestartButton onClick={this.restartGame} />
         <RulesButton onClick={this.toggleRules} />
-        <div className="moves-count" data-moves={0}>
+        <div>
           <label>Moves:</label>
           <span id="moves-count"> {this.props.localStats.movesCount}</span>
         </div>
@@ -71,7 +70,7 @@ export class Header extends Component {
             <label>Total computer score:</label>
             <span> {this.props.globalStats.computerWinCount}</span>
           </div>
-          <div className="total-moves-counter" data-moves={0}>
+          <div className="total-moves-counter">
             <label>Total moves:</label>
             <span> {this.props.globalStats.movesCount}</span>
           </div>
@@ -92,9 +91,7 @@ export class Header extends Component {
 const mapStateToProps = state => {
   return {
     globalStats: state.stats.global,
-    localStats: state.stats.local,
-    modals: state.modals,
-    gameState: state.gameState
+    localStats: state.stats.local
   };
 };
 

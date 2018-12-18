@@ -62,9 +62,9 @@ export class GameView extends Component {
 
     const confettiConfig = {
       angle: 90,
-      spread: 100,
+      spread: 80,
       startVelocity: 50,
-      elementCount: 100,
+      elementCount: 30,
       decay: 0.9
     };
 
@@ -102,7 +102,7 @@ const mapDispatchToProps = dispatch => {
   return {
     showModal: modal => dispatch({ type: "SHOW_MODAL", modal: modal }),
     hideModal: modal => dispatch({ type: "HIDE_MODAL", modal: modal }),
-    takeCards: howMany => dispatch(logicActions.takeCards("player")),
+    takeCards: () => dispatch(logicActions.takeCards("player")),
     updateGameFactor: (factor, value) =>
       dispatch(logicActions.updateGameFactor(factor, value)),
     endTurn: () => {

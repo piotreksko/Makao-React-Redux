@@ -35,7 +35,6 @@ export const updateLocalStat = (stat) => {
   return (dispatch, getState) => {
     const stats = getState().stats.local;
     const newValue = stats[stat]+1;
-    console.log(typeof newValue);
     dispatch({ type: UPDATE_LOCAL_STAT, stat, newValue });
   };
 };

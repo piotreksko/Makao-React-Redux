@@ -12,14 +12,13 @@ import WhoStartsModal from "../components/modals/WhoStartsModal";
 import _ from 'lodash';
 
 export class Modals extends Component {
-
+  
   shouldComponentUpdate(nextProps, nextState) {
-    const modalsChanged = _.isEqual(nextProps.modals, this.props.modals);
+    const modalsChanged = !_.isEqual(nextProps.modals, this.props.modals);
 
     if (modalsChanged) return true;
     else return false;
   }
-  
   changeSuit = weight => {
     this.props.updateGameFactor("chosenWeight", weight);
     this.props.hideModal("ace");

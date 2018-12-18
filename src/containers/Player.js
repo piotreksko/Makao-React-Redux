@@ -30,25 +30,45 @@ class Player extends Component {
       }, 1200);
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    if (
-      !_.isEqual(prevState, this.state) ||
-      !_.isEqual(
-        prevProps.gameState.cpuPlayer,
-        this.props.gameState.cpuPlayer
-      ) ||
-      !_.isEqual(prevProps.gameState.Player, this.props.gameState.Player)
-    )
-      this.checkAvailableCards();
+  shouldComponentUpdate(nextProps, nextState) {
+    const firstTurn = this.isFirstTurn();
+
+    const changed = this.haveCardsChanged(nextProps, nextState);
+    const ended = this.hasCpuEndedTurn(nextProps);
+
+    if (changed || ended || firstTurn) return true;
+    else return false;
   }
 
-  // shouldComponentUpdate(nextProps, nextState) {
-  //   const cardsChanged = _.isEqual(nextProps.gameState.player.cards, nextProps.gameState.player.cards);
+  componentDidUpdate(prevProps) {
+    const changed = this.haveCardsChanged(prevProps);
+    const firstTurn = this.isFirstTurn();
+    debugger;
+    let clearSelectedCards = !_.isEqual(prevProps.gameState.player, this.props.gameState.player) && this.state.selectedCards.length
+    let newSelectedCards = clearSelectedCards ? [] : this.state.selectedCards;
 
-  //   if (cardsChanged) return true;
-  //   else return false;
-  // }
-  
+
+    if (changed && !firstTurn) this.checkAvailableCards(newSelectedCards);
+  }
+
+  haveCardsChanged(props, nextState) {
+    return (
+      !_.isEqual(props.gameState.player, this.props.gameState.player) ||
+      !_.isEqual(nextState, this.state)
+    );
+  }
+
+  hasCpuEndedTurn(nextProps) {
+    return !_.isEqual(
+      nextProps.gameState.cpuPlayer,
+      this.props.gameState.cpuPlayer
+    );
+  }
+
+  isFirstTurn() {
+    return this.props.stats.movesCount === 0;
+  }
+
   waitTurns = () => {
     this.props.playSound("click");
     this.props.playerWait();
@@ -121,7 +141,7 @@ class Player extends Component {
     });
   };
 
-  checkAvailableCards = () => {
+  checkAvailableCards = (newSelectedCards) => {
     const selectedCards = this.state.selectedCards;
     const playerWait = this.props.gameState.player.wait;
 
@@ -130,7 +150,7 @@ class Player extends Component {
     if (!selectedCards.length) {
       this.hasNoSelectedCards();
     } else if (selectedCards.length) {
-      this.hasSelectedCards();
+      this.hasSelectedCards(newSelectedCards);
     }
   };
 
@@ -187,11 +207,10 @@ class Player extends Component {
         newAvailable.push(playerCards[idx]);
       }
     });
-    this.updatePlayerCards(newAvailable, newPossible);
+    this.updatePlayerCards(newAvailable, newPossible, []);
   };
 
   getBattleCards = (card, idx, playerCards, pileTopCard, newAvailable = []) => {
-
     // Battle cards are 2, 3, king of spades and hearts
     if (
       card.type === pileTopCard.type ||
@@ -211,7 +230,7 @@ class Player extends Component {
     return newAvailable;
   };
 
-  hasSelectedCards() {
+  hasSelectedCards(newSelectedCards) {
     const {
       player,
       waitTurn,
@@ -221,11 +240,11 @@ class Player extends Component {
       pile
     } = this.props.gameState;
     const playerCards = player.cards;
-
+    debugger;
     let pileTopCard = _.cloneDeep(pile[pile.length - 1]),
       newAvailable = [],
-      newPossible = [];
-
+      newPossible = [],
+      newSelected = newSelectedCards;
     if (pileTopCard.type === "ace") {
       pileTopCard.weight = chosenWeight;
     }
@@ -253,7 +272,7 @@ class Player extends Component {
       )
         return newAvailable.push(playerCards[idx]);
     });
-    this.updatePlayerCards(newAvailable, newPossible);
+    this.updatePlayerCards(newAvailable, newPossible, newSelected);
   }
 
   sameType(card, pileTopCard) {
@@ -283,23 +302,24 @@ class Player extends Component {
     return card.type === "4" && waitTurn;
   }
 
-  updatePlayerCards(newAvailable, newPossible) {
+  updatePlayerCards(newAvailable, newPossible, newSelected) {
+
     this.setState({
-      ...this.state,
       availableCards: newAvailable,
-      possibleCards: newPossible
+      possibleCards: newPossible,
+      selectedCards: newSelected
     });
   }
 
   stylePlayerCards(playerCards, availableCards, possibleCards, selectedCards) {
     let cards = _.cloneDeep(playerCards);
+    debugger;
 
     if (
       !cards.length ||
       (!availableCards.length && !selectedCards.length && !possibleCards.length)
     )
       return playerCards;
-
     const topCard = selectedCards.length
       ? selectedCards[selectedCards.length - 1]
       : null;
@@ -383,7 +403,8 @@ class Player extends Component {
 
 const mapStateToProps = state => {
   return {
-    gameState: state.gameState
+    gameState: state.gameState,
+    stats: state.stats
   };
 };
 
