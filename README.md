@@ -4,19 +4,16 @@ My favorite cards game - Makao.
 WORK in progress
 
 ### Working:
-* Whole game logic mentioned in rules
+* Game logic
 * AI
-* Cards highlighting and picking
 * Sound effects
+* Stats tracking
 
 ### Things to do:
 
-* Fix bugs introduced in last commit
-* Working stats tracking
-* Improve components lifecycles
 * Tests
-* Improve and refactor AI algorithm
-* More features e.g. more AI players
+* Improve AI algorithm
+* More features and small details
 
 ## [Live Demo ](https://makao-react.firebaseapp.com/)
 
