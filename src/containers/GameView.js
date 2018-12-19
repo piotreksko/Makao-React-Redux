@@ -79,8 +79,8 @@ export class GameView extends Component {
         </div>
         <Header />
         <CpuPlayer cpuPlayer={gameState.cpuPlayer} />
-        <div className="flex-container middle">
-          <Deck takeCard={this.takeCards} playerCanMove={playerCanMove} />
+        <div className="flex-container middle cards-container">
+          <Deck takeCard={this.takeCards} playerCanMove={playerCanMove} cardsInDeck={gameState.deck.length} />
           <Pile cards={pile} />
           <Icons />
         </div>

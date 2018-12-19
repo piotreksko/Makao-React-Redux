@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { sortCards } from "../utility/utility";
-import * as statsActions from './statsActions';
+import * as statsActions from "./statsActions";
 import { checkSoundsToPlay, playSound } from "./soundActions";
 export const UPDATE_PLAYER_CARDS = "UPDATE_PLAYER_CARDS";
 export const UPDATE_CPU_CARDS = "UPDATE_CPU_CARDS";
@@ -81,8 +81,8 @@ export function waitTurns(who) {
   return function(dispatch, getState) {
     const gameState = getState().gameState;
 
-    dispatch(statsActions.updateLocalStat('movesCount'));
-    dispatch(statsActions.updateGlobalStat('movesCount'));
+    dispatch(statsActions.updateLocalStat("movesCount"));
+    dispatch(statsActions.updateGlobalStat("movesCount"));
 
     if (gameState.waitTurn) {
       dispatch(updateGameFactor("waitTurn", 0));
@@ -95,8 +95,8 @@ export function waitTurns(who) {
 
 export function addToPile(cards) {
   return (dispatch, getState) => {
-    dispatch(statsActions.updateLocalStat('movesCount'));
-    dispatch(statsActions.updateGlobalStat('movesCount'));
+    dispatch(statsActions.updateLocalStat("movesCount"));
+    dispatch(statsActions.updateGlobalStat("movesCount"));
 
     cards = getRandomTransformValues(cards);
     dispatch({
@@ -149,8 +149,7 @@ export function checkMacao(gameState) {
       gameState.player.cards.length === 1 ||
       gameState.cpuPlayer.cards.length === 1
     ) {
-
-      dispatch(statsActions.updateGlobalStat('makaoCallCount'));
+      dispatch(statsActions.updateGlobalStat("makaoCallCount"));
       dispatch({ type: "SHOW_MODAL", modal: "macao" });
       setTimeout(() => {
         dispatch({ type: "HIDE_MODAL", modal: "macao" });
@@ -164,13 +163,13 @@ export function checkWin(gameState) {
     if (!gameState.player.cards.length) {
       dispatch({ type: "SHOW_MODAL", modal: "gameOver" });
       dispatch(playSound("victory"));
-      dispatch(statsActions.updateLocalStat('playerWinCount'));
-      dispatch(statsActions.updateGlobalStat('playerWinCount'));
+      dispatch(statsActions.updateLocalStat("playerWinCount"));
+      dispatch(statsActions.updateGlobalStat("playerWinCount"));
     } else if (!gameState.cpuPlayer.cards.length) {
       dispatch({ type: "SHOW_MODAL", modal: "gameOver" });
       dispatch(playSound("defeat"));
-      dispatch(statsActions.updateLocalStat('computerWinCount'));
-      dispatch(statsActions.updateGlobalStat('computerWinCount'));
+      dispatch(statsActions.updateLocalStat("computerWinCount"));
+      dispatch(statsActions.updateGlobalStat("computerWinCount"));
     }
   };
 }
@@ -178,12 +177,12 @@ export function checkWin(gameState) {
 export function takeCards(who) {
   return function(dispatch, getState) {
     const gameState = getState().gameState;
-    dispatch(statsActions.updateLocalStat('movesCount'));
-    dispatch(statsActions.updateGlobalStat('movesCount'));
-    
+    dispatch(statsActions.updateLocalStat("movesCount"));
+    dispatch(statsActions.updateGlobalStat("movesCount"));
+
     let howMany = gameState.cardsToTake - 1;
     if (!howMany) howMany = 1;
-    
+
     // Check if there are enough cards on deck
     let deck = gameState.deck;
     if (deck.length < howMany) {
@@ -191,16 +190,16 @@ export function takeCards(who) {
       deck = getState().gameState.deck;
     }
     dispatch({ type: "TAKE_FROM_DECK", howMany });
-    
+
     const cardsToTake = deck.slice(deck.length - howMany, deck.length);
     let newCardsWithTakenCards = sortCards([
       ...cardsToTake,
       ..._.cloneDeep(gameState[who].cards)
     ]);
-    
+
     if (who === "player") dispatch(updatePlayerCards(newCardsWithTakenCards));
     else dispatch(updateCpuCards(newCardsWithTakenCards));
-    
+
     if (gameState.cardsToTake > 1) dispatch(updateGameFactor("cardsToTake", 1));
     if (gameState.jackActive)
       dispatch(updateGameFactor("jackActive", gameState.jackActive - 1));
@@ -256,10 +255,12 @@ function verifyUsedCards(cards) {
           }
           break;
         case "jack":
+          dispatch(checkWin(gameState));
           dispatch({ type: "SHOW_MODAL", modal: "jack" });
           gameFactors.jackActive = 3;
           break;
         case "ace":
+          dispatch(checkWin(gameState));
           dispatch({ type: "SHOW_MODAL", modal: "ace" });
           break;
         case "king":
@@ -300,8 +301,7 @@ function checkGameFactorsToUpdate(gameFactors) {
     if (gameFactors.jackActive) gameFactors.jackActive -= 1;
 
     _.forOwn(gameFactors, function(value, key) {
-      if (value !== gameState[key])
-        dispatch(updateGameFactor(key, value));
+      if (value !== gameState[key]) dispatch(updateGameFactor(key, value));
     });
   };
 }
@@ -717,7 +717,10 @@ function verifyCardsFromAI(cardsToUse) {
     };
     const cpuCards = cpuPlayer.cards;
     let newCpuCards = _.cloneDeep(cpuPlayer.cards);
-    let allNeutralCards = getSameTypeAndWeightAmount(getNeutralCards(cpuCards), cpuCards);
+    let allNeutralCards = getSameTypeAndWeightAmount(
+      getNeutralCards(cpuCards),
+      cpuCards
+    );
     let mostMovesCard = getCardWithMostMoves(cardsToUse);
 
     // Bool to use if cpu has more than 1 jack to use

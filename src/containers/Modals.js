@@ -19,6 +19,7 @@ export class Modals extends Component {
     if (modalsChanged) return true;
     else return false;
   }
+  
   changeSuit = weight => {
     this.props.updateGameFactor("chosenWeight", weight);
     this.props.hideModal("ace");

@@ -1,14 +1,34 @@
 import React from "react";
 import CardBack from "./cards/CardBack";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 
 const Deck = props => {
-  return <CardBack deckCard={true} takeCard={props.takeCard} playerCanMove={props.playerCanMove}/>;
+  const number = props.cardsInDeck;
+  debugger;
+  let howManyToRender = parseInt(number / 10) + 2;
+
+  let deckToRender = [];
+
+  for (let i = 0; i < howManyToRender; i++) {
+    let cardToPush = (
+      <CardBack
+      key={i}
+      number={i}
+      highlight={ i===0 ? true : false}
+      deckCard={true}
+      takeCard={props.takeCard}
+      playerCanMove={props.playerCanMove}
+      />);
+      
+    deckToRender.push(cardToPush);
+  }
+
+  return <div className="deck">{deckToRender}</div>;
 };
 
-Deck.propTypes = { 
+Deck.propTypes = {
   playerCanMove: PropTypes.bool,
   takeFromDeck: PropTypes.func
- };
- 
+};
+
 export default Deck;

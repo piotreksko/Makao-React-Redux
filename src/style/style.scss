@@ -39,16 +39,13 @@
 }
 
 body {
-  margin-top: 60px;
-  margin-left: 20px;
-  margin-right: 20px;
   background: #0e8b44
     url("https://bfa.github.io/solitaire-js/img/green_felt.jpg") no-repeat
     center center fixed;
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
-  -o-background-size: cover;
   background-size: cover;
+  -o-background-size: cover;
+  -moz-background-size: cover;
+  -webkit-background-size: cover;
 }
 .score {
   margin-right: 10px;
@@ -122,7 +119,7 @@ body {
 }
 
 .score-board {
-  min-height: 110px;
+  min-height: 7rem;
   position: relative;
   background: rgba(0, 0, 0, 0.15);
   margin: 1.5em 20% 0.5em 20%;
@@ -140,8 +137,7 @@ body {
     display: inline-block;
 
     &:last-child,
-    &:nth-last-child(2),
-    &:nth-last-child(3) {
+    &:nth-last-child(2) {
       float: right;
       text-align: left;
     }
@@ -162,7 +158,9 @@ body {
   background-size: 120px 170px;
   background-repeat: no-repeat;
   transition: 0.1s ease-in-out;
+  @include box-shadow(0px, 0px, 20px, 3px, rgba(48, 48, 48, 0.3));
 }
+
 .available {
   &:hover {
     @extend %hoverable-card;
@@ -187,6 +185,13 @@ body {
 .flex-container {
   display: flex;
   justify-content: center;
+  .deck {
+    margin-right: 10rem;
+    * {
+      position: absolute;
+      cursor: pointer;
+    }
+  }
 }
 .row {
   display: -webkit-box;
@@ -250,7 +255,7 @@ button {
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center center;
-  transform: translate(12rem, 3rem);
+  transform: translate(8rem, 3rem);
   width: 50px;
   height: 50px;
   margin-left: 2rem;
@@ -265,7 +270,7 @@ button {
   position: relative;
   margin: auto;
   width: 30px;
-  top: 20%;
+  top: 10%;
 }
 .red-icon {
   @extend .icon;
@@ -346,8 +351,8 @@ fieldset {
 }
 .rules-icon {
   @include rounded(5px);
-  width: 40px !important;
-  height: 40px;
+  width: 50px !important;
+  height: 50px;
   border: 0;
   background: rgba(0, 0, 0, 0.1);
   cursor: pointer;
@@ -361,8 +366,8 @@ fieldset {
   margin: 0 15px;
 }
 .icon-image {
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   text-align: center;
 }
 .newWeight {
@@ -382,13 +387,15 @@ fieldset {
 #playerContainer {
   margin-bottom: 2%;
 }
+.cards {
+  transform: translateX(2rem);
+}
 .cardsInHand {
   margin-left: -95px;
 }
 .cards-container {
   min-height: 170px;
   margin: 2rem 0;
-  transform: translateX(2rem);
 }
 
 #reset {
@@ -425,14 +432,34 @@ fieldset {
   background-color: #333;
 }
 
-@media only screen and (min-width: 480px) and (max-width: 1024px) {
-  #score {
-    margin: 1.5em 5% 0.5em 5%;
+@media only screen and (max-width: 992px) {
+  .score-board {
+    margin: 0;
+    padding: 0;
+    padding-top: 1rem;
+  }
+  .rules-icon {
+    margin: 10px 5px 10px 5px;
+  }
+  .global-stats {
+    margin-right: 4rem;
   }
 }
 
 @media only screen and (max-width: 480px) {
-  #score {
-    margin: 1.5em 0 0.5em 0;
+  .global-stats {
+    display: none;
+  }
+  .current-stats {
+    margin-right: 5rem;
+  }
+  .cards-container {
+    margin: 1rem 0;
   }
 }
+
+// @media only screen and (max-width: 480px) {
+//   #score {
+//     margin: 1.5em 0 0.5em 0;
+//   }
+// }

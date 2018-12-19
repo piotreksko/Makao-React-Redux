@@ -17,19 +17,19 @@ export class Header extends PureComponent {
     };
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this.props.fetchStats();
   }
 
   toggleRules = () => {
-    this.props.playSound('click');
+    this.props.playSound("click");
     this.setState({
       openRules: !this.state.openRules
     });
   };
 
   restartGame = () => {
-    this.props.playSound('click');
+    this.props.playSound("click");
     this.props.restartGame();
   };
 
@@ -49,13 +49,7 @@ export class Header extends PureComponent {
         </ReactModal>
         <RestartButton onClick={this.restartGame} />
         <RulesButton onClick={this.toggleRules} />
-        <div>
-          <label>Moves:</label>
-          <span id="moves-count"> {this.props.localStats.movesCount}</span>
-        </div>
-        <div className="message">
-          <label>Message:</label>
-        </div>
+
         <div className="global-stats">
           <h6>Global statistics</h6>
           <div className="score">
@@ -75,13 +69,20 @@ export class Header extends PureComponent {
             <span> {this.props.globalStats.movesCount}</span>
           </div>
         </div>
-        <div className="score">
-          <label>Computer score:</label>
-          <span> {this.props.localStats.computerWinCount}</span>
-        </div>
-        <div className="score">
-          <label>Your score:</label>
-          <span> {this.props.localStats.playerWinCount}</span>
+        <div className="current-stats">
+          <h6>Current game</h6>
+          <div className="score">
+            <label>Moves:</label>
+            <span> {this.props.localStats.movesCount}</span>
+          </div>
+          <div className="score">
+            <label>Computer score:</label>
+            <span> {this.props.localStats.computerWinCount}</span>
+          </div>
+          <div className="score">
+            <label>Your score:</label>
+            <span> {this.props.localStats.playerWinCount}</span>
+          </div>
         </div>
       </div>
     );
@@ -98,7 +99,8 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return {
     fetchStats: () => dispatch(statsActions.fetchStats()),
-    updateLocalStat: (stat, value) => dispatch(statsActions.updateLocalStat(stat, value)),
+    updateLocalStat: (stat, value) =>
+      dispatch(statsActions.updateLocalStat(stat, value)),
     restartGame: () => dispatch({ type: logicActions.RESTART_GAME }),
     playSound: soundName => dispatch(soundActions.playSound(soundName))
   };
