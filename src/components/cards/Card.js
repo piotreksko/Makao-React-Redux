@@ -2,14 +2,11 @@ import React from "react";
 import PropTypes from "prop-types";
 
 const Card = props => {
-  const fileName = props.card.type + "_of_" + props.card.weight;
-  const img =
-    "https://res.cloudinary.com/bosmanone/image/upload/v1477397924/cards/" +
-    fileName +
-    ".png";
+  const fileName = "card_" + props.card.type + "_of_" + props.card.weight;
+  const card = require(`../../content/images/cards/${fileName}.jpg`);
 
   let cardStyle = {
-    backgroundImage: "url(" + img + ")"
+    backgroundImage: "url(" + card + ")"
   };
 
   if (props.fromPile) {
