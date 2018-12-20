@@ -40,7 +40,7 @@
 
 body {
   background: #0e8b44
-    url("https://bfa.github.io/solitaire-js/img/green_felt.jpg") no-repeat
+    url("../content/images/green_felt.jpg") no-repeat
     center center fixed;
   background-size: cover;
   -o-background-size: cover;
@@ -398,14 +398,6 @@ fieldset {
   margin: 2rem 0;
 }
 
-#reset {
-  background: url(https://cdn4.iconfinder.com/data/icons/game-general-icon-set-1/512/reset-512.png);
-  background-size: 20px 20px;
-  width: 20px;
-  background-repeat: no-repeat;
-  background-position: center;
-  height: 20px;
-}
 .confetti {
   position: fixed;
   transform: translate(-50%, -50%);

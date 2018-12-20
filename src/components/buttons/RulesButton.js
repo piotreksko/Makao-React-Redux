@@ -1,4 +1,5 @@
 import React from "react";
+import rulesButton from '../../content/images/rules_button.png'
 
 export default function RulesButton(props) {
   return (
@@ -6,7 +7,7 @@ export default function RulesButton(props) {
       <img
         alt="restart"
         className="icon-image"
-        src="https://cdn.iconscout.com/public/images/icon/premium/png-512/prescription-notes-rules-checklist-todo-tasks-39940c544bd69358-512x512.png"
+        src={rulesButton}
       />
     </button>
   );

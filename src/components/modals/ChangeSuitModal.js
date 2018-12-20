@@ -1,4 +1,8 @@
 import React from "react";
+import heartsSymbol from '../../content/images/symbols/hearts_symbol.png';
+import diamondsSymbol from '../../content/images/symbols/diamonds_symbol.png';
+import clubsSymbol from '../../content/images/symbols/clubs_symbol.png';
+import spadesSymbol from '../../content/images/symbols/spades_symbol.png';
 
 export default function ChangeSuitModal(props) {
   return (
@@ -9,14 +13,14 @@ export default function ChangeSuitModal(props) {
           <img
             alt="heartSymbol"
             className="icon-image"
-            src="https://upload.wikimedia.org/wikipedia/commons/7/77/Heart_symbol_c00.png"
+            src={heartsSymbol}
           />
         </button>
         <button onClick={e => props.changeSuit('diamonds')} className="suit-icon">
           <img
             alt="diamondsSymbol"
             className="icon-image"
-            src="https://www.spreadshirt.com/image-server/v1/designs/11631716,width=178,height=178/card-suit-diamond.png"
+            src={diamondsSymbol}
           />
         </button>
       </div>
@@ -25,14 +29,14 @@ export default function ChangeSuitModal(props) {
           <img
             alt="clubsSymbol"
             className="icon-image"
-            src="http://www.clker.com/cliparts/U/3/0/g/Z/y/carte-de-trefla-md.png"
+            src={clubsSymbol}
           />
         </button>
         <button onClick={e => props.changeSuit('spades')} className="suit-icon">
           <img
             alt="spadesSymbol"
             className="icon-image"
-            src="https://image.freepik.com/free-icon/spades-symbol_318-40683.jpg"
+            src={spadesSymbol}
           />
         </button>
       </div>

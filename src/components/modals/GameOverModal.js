@@ -1,4 +1,5 @@
 import React from "react";
+import restartButton from '../../content/images/restart_button.png'
 
 export default function GameOverModal(props) {
   return (
@@ -13,7 +14,7 @@ export default function GameOverModal(props) {
         <img
           alt="restartButton"
           className="icon-image"
-          src="https://cdn4.iconfinder.com/data/icons/game-general-icon-set-1/512/reset-512.png"
+          src={restartButton}
         />
       </button>
       <h5 style={{ color: "white" }}>Play again</h5>
