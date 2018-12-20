@@ -2,9 +2,9 @@ import React from "react";
 import PropTypes from "prop-types";
 
 const Card = props => {
-  const fileName = "card_" + props.card.type + "_of_" + props.card.weight;
-  const card = require(`../../content/images/cards/${fileName}.jpg`);
-
+  const fileName = props.card.type + "_of_" + props.card.weight;
+  const card = require(`../../content/images/cards/${fileName}.png`);
+  
   let cardStyle = {
     backgroundImage: "url(" + card + ")"
   };

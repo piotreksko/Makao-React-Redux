@@ -1,12 +1,12 @@
 import React from "react";
 import classNames from "classnames";
 import PropTypes from 'prop-types';
+import cardBack from '../../content/images/cards/card_back.png';
 
 const card = props => {
-  debugger;
   let cardStyle = {
     backgroundImage:
-      "url(https://bfa.github.io/solitaire-js/img/card_back_bg.png)",
+      "url(" + cardBack + ")",
     transform: props.deckCard ? `translateY(-${props.number * 3}px)` : 0  
   };
   const cardClasses = classNames({
