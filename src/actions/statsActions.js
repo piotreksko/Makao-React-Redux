@@ -18,7 +18,8 @@ export const fetchStats = () => {
 export const updateGlobalStat = (stat, value) => {
   return (dispatch, getState, getFirebase) => {
     const stats = getState().stats.global;
-    const newValue = stats[stat]+1;
+    if (!stats.movesCount) return;
+    const newValue = stats[stat] + 1;
     const firebase = getFirebase();
     firebase
       .database()
@@ -31,10 +32,10 @@ export const updateGlobalStat = (stat, value) => {
   };
 };
 
-export const updateLocalStat = (stat) => {
+export const updateLocalStat = stat => {
   return (dispatch, getState) => {
     const stats = getState().stats.local;
-    const newValue = stats[stat]+1;
+    const newValue = stats[stat] + 1;
     dispatch({ type: UPDATE_LOCAL_STAT, stat, newValue });
   };
 };

@@ -629,7 +629,7 @@ function checkCardsToUse(availableCards) {
       cardsToUse = kings;
     }
 
-    if (jacks.length && neutralCards.length === 1) {
+    if (jacks.length && neutralCards.length === 1 && jacksValue) {
       cardsToUse = jacks;
     }
     return cardsToUse;
