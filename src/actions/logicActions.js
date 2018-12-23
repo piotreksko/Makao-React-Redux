@@ -93,12 +93,17 @@ export function waitTurns(who) {
   };
 }
 
-export function addToPile(cards) {
+export function addToPile(cards, who) {
   return (dispatch, getState) => {
+    let isFromPlayer = who === "player";
     dispatch(statsActions.updateLocalStat("movesCount"));
     dispatch(statsActions.updateGlobalStat("movesCount"));
 
     cards = getRandomTransformValues(cards);
+    cards = cards.map(card => {
+      card.isFromPlayer = isFromPlayer;
+      return card;
+    });
     dispatch({
       type: "ADD_TO_PILE",
       cards: cards
@@ -222,13 +227,15 @@ export function makePlayerMove(cards) {
 
     const newPlayerCards = dispatch(verifyUsedCards(cards));
 
-    dispatch(addToPile(cards));
+    dispatch(addToPile(cards, "player"));
     dispatch(updatePlayerCards(newPlayerCards));
 
     const modals = getState().modals;
 
     if (!modals.ace && !modals.jack) {
-      dispatch(makeCpuMove());
+      setTimeout(() => {
+        dispatch(makeCpuMove());
+      }, 800);
       dispatch(checkMacaoAndWin());
     }
   };
@@ -363,7 +370,7 @@ function hasCardsAvailable(availableCards) {
       let newCpuCards = dispatch(verifyCardsFromAI(cardsToUse));
 
       availableCards = [];
-      dispatch(addToPile(cardsToUse));
+      dispatch(addToPile(cardsToUse, "cpuPlayer"));
       newCpuCards = sortCards(newCpuCards);
       dispatch(updateCpuCards(newCpuCards));
     }
@@ -753,7 +760,6 @@ function verifyCardsFromAI(cardsToUse) {
                 ).type;
               else gameFactors.chosenType = null;
             }
-            debugger;
             gameFactors.chosenType
               ? (gameFactors.jackActive = 3)
               : (gameFactors.jackActive = 0);

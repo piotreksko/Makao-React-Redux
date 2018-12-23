@@ -1,34 +1,36 @@
-import React from "react";
+import React, { Component } from "react";
 import PropTypes from "prop-types";
 
-const Card = props => {
-  const fileName = props.card.type + "_of_" + props.card.weight;
-  const card = require(`../../content/images/cards/${fileName}.png`);
-  
-  let cardStyle = {
-    backgroundImage: "url(" + card + ")"
-  };
+class Card extends Component {
+  render() {
+    const fileName = this.props.card.type + "_of_" + this.props.card.weight;
+    const card = require(`../../content/images/cards/${fileName}.png`);
 
-  if (props.fromPile) {
-    cardStyle.position = "absolute";
-    if (props.card.transform) {
-      const { rotate, x, y } = props.card.transform;
-      cardStyle.transform = `rotate(${rotate}deg) translate(${x}px, ${y}px)`;
-    }
-  }
+    let cardStyle = {
+      backgroundImage: "url(" + card + ")"
+    };
 
-  return (
-    <div
-      onClick={
-        props.clickOwnCard
-          ? e => props.clickOwnCard(props.card, props.index)
-          : null
+    if (this.props.fromPile) {
+      cardStyle.position = "absolute";
+      if (this.props.card.transform) {
+        const { rotate, x, y } = this.props.card.transform;
+        cardStyle.transform = `rotate(${rotate}deg) translate(${x}px, ${y}px)`;
       }
-      className={["card", props.cardClass].join(" ")}
-      style={cardStyle}
-    />
-  );
-};
+    }
+
+    return (
+      <div
+        onClick={
+          this.props.clickOwnCard
+            ? e => this.props.clickOwnCard(this.props.card, this.props.index)
+            : null
+        }
+        className={["card", this.props.cardClass].join(" ")}
+        style={cardStyle}
+      />
+    );
+  }
+}
 
 Card.propTypes = {
   card: PropTypes.object

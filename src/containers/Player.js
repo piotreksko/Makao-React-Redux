@@ -1,7 +1,9 @@
 import React, { Component } from "react";
+import ReactDOM from "react-dom";
 import { connect } from "react-redux";
 import _ from "lodash";
 import Aux from "../hoc/Auxilliary";
+import { CSSTransition, transit } from "react-css-transition";
 
 import * as logicActions from "../actions/logicActions";
 import * as soundActions from "../actions/soundActions";
@@ -43,10 +45,10 @@ class Player extends Component {
   componentDidUpdate(prevProps) {
     const changed = this.haveCardsChanged(prevProps);
     const firstTurn = this.isFirstTurn();
-    debugger;
-    let clearSelectedCards = !_.isEqual(prevProps.gameState.player, this.props.gameState.player) && this.state.selectedCards.length
+    let clearSelectedCards =
+      !_.isEqual(prevProps.gameState.player, this.props.gameState.player) &&
+      this.state.selectedCards.length;
     let newSelectedCards = clearSelectedCards ? [] : this.state.selectedCards;
-
 
     if (changed && !firstTurn) this.checkAvailableCards(newSelectedCards);
   }
@@ -72,7 +74,10 @@ class Player extends Component {
   waitTurns = () => {
     this.props.playSound("click");
     this.props.playerWait();
-    this.props.endTurn();
+    this.updatePlayerCards([],[],[]);
+    setTimeout(() => {
+      this.props.endTurn();
+    }, 1200);
   };
 
   clickOwnCard = (card, index) => {
@@ -137,11 +142,13 @@ class Player extends Component {
     makePlayerMove(this.state.selectedCards);
     this.setState({
       ...this.state,
-      selectedCards: []
+      selectedCards: [],
+      availableCards: [],
+      possibleCards: []
     });
   };
 
-  checkAvailableCards = (newSelectedCards) => {
+  checkAvailableCards = newSelectedCards => {
     const selectedCards = this.state.selectedCards;
     const playerWait = this.props.gameState.player.wait;
 
@@ -240,7 +247,7 @@ class Player extends Component {
       pile
     } = this.props.gameState;
     const playerCards = player.cards;
-    debugger;
+
     let pileTopCard = _.cloneDeep(pile[pile.length - 1]),
       newAvailable = [],
       newPossible = [],
@@ -303,7 +310,6 @@ class Player extends Component {
   }
 
   updatePlayerCards(newAvailable, newPossible, newSelected) {
-
     this.setState({
       availableCards: newAvailable,
       possibleCards: newPossible,
@@ -313,7 +319,6 @@ class Player extends Component {
 
   stylePlayerCards(playerCards, availableCards, possibleCards, selectedCards) {
     let cards = _.cloneDeep(playerCards);
-    debugger;
 
     if (
       !cards.length ||
@@ -360,6 +365,28 @@ class Player extends Component {
     return card.class ? card.class : "";
   }
 
+  getTransformationValue() {
+    let transformation;
+    let deck = document.getElementsByClassName("deck");
+    let cardContainers = document.getElementsByClassName("cards-container");
+    if (deck.length && cardContainers.length) {
+      const deckPosition = deck[0].getBoundingClientRect();
+      const playerPosition = cardContainers[
+        cardContainers.length - 1
+      ].getBoundingClientRect();
+      transformation = {
+        x: deckPosition.x - playerPosition.width / 2,
+        y: deckPosition.y - playerPosition.y
+      };
+    } else {
+      transformation = {
+        x: -100,
+        y: -200
+      };
+    }
+    return transformation;
+  }
+
   render() {
     const gameState = this.props.gameState,
       playerCards = gameState.player.cards,
@@ -368,7 +395,10 @@ class Player extends Component {
         (pileTopCard.type === "4" && gameState.waitTurn) ||
         gameState.player.wait
           ? true
-          : false;
+          : false,
+      transitionsOn = true;
+    let transformationValue = this.getTransformationValue();
+
     return (
       <Aux>
         <div className={"flex-container cards-container"}>
@@ -379,13 +409,31 @@ class Player extends Component {
               this.state.possibleCards,
               this.state.selectedCards
             ).map((card, index) => (
-              <Card
-                key={index}
-                clickOwnCard={this.clickOwnCard}
-                card={card}
-                index={index}
-                cardClass={card.class + " cardsInHand"}
-              />
+              <CSSTransition
+                key={`${card.type}_${card.weight}`}
+                transitionDelay={{
+                  enter: this.isFirstTurn() ? index * 100 : 0
+                }}
+                transitionAppear={{ transitionsOn }}
+                defaultStyle={{
+                  transform: `translate(${transformationValue.x}px, ${
+                    transformationValue.y
+                  }px)`
+                }}
+                enterStyle={{
+                  transform: transit("translate(0, 0)", 300, "ease-in-out")
+                }}
+                activeStyle={{ transform: "translate(0, 0)" }}
+                active={transitionsOn}
+              >
+                <Card
+                  key={`${card.type}_${card.weight}`}
+                  clickOwnCard={this.clickOwnCard}
+                  card={card}
+                  index={index}
+                  cardClass={card.class + " cardsInHand"}
+                />
+              </CSSTransition>
             ))}
           </div>
           <WaitIcon waitTurn={this.props.gameState.player.wait} />
