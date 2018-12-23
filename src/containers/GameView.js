@@ -43,9 +43,10 @@ export class GameView extends Component {
   // }
 
   takeCards() {
-    this.props.playSound("take_card");
     this.props.takeCards(this.props.gameState.cardsToTake);
-    this.props.endTurn();
+    setTimeout(() => {
+      this.props.endTurn();
+    }, 1000);
   }
 
   restartGame() {

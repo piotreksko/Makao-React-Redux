@@ -17,22 +17,34 @@ class Player extends Component {
     this.state = {
       availableCards: [],
       possibleCards: [],
-      selectedCards: []
+      selectedCards: [],
+      isPlayerTurn: true
     };
   }
 
   componentWillMount() {
-    if (this.props.gameState.playerTurn)
+    if (this.props.gameState.playerTurn) {
+      this.setState({
+        ...this.state,
+        isPlayerTurn: true
+      });
       setTimeout(() => {
         this.checkAvailableCards();
       }, 1200);
-    else
+    } else {
+      this.setState({
+        ...this.state,
+        isPlayerTurn: false
+      });
       setTimeout(() => {
         this.props.endTurn();
-      }, 1200);
+      }, 1000);
+    }
+    this.props.playSound("shuffle");
   }
 
   shouldComponentUpdate(nextProps, nextState) {
+    debugger;
     const firstTurn = this.isFirstTurn();
 
     const changed = this.haveCardsChanged(nextProps, nextState);
@@ -43,14 +55,33 @@ class Player extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const changed = this.haveCardsChanged(prevProps);
+    const ended = this.hasCpuEndedTurn(prevProps);
+    debugger;
+
+    if (prevProps.gameState.player.cards.length < this.props.gameState.player.cards.length){
+      this.setState({
+        ...this.state,
+        isPlayerTurn: false
+      });
+    }
+    
+    if (ended) {
+      this.setState({
+        ...this.state,
+        isPlayerTurn: true
+      });
+    };
+
+
+
     const firstTurn = this.isFirstTurn();
     let clearSelectedCards =
       !_.isEqual(prevProps.gameState.player, this.props.gameState.player) &&
       this.state.selectedCards.length;
     let newSelectedCards = clearSelectedCards ? [] : this.state.selectedCards;
 
-    if (changed && !firstTurn) this.checkAvailableCards(newSelectedCards);
+    if (this.state.isPlayerTurn && !firstTurn)
+      this.checkAvailableCards(newSelectedCards);
   }
 
   haveCardsChanged(props, nextState) {
@@ -73,8 +104,12 @@ class Player extends Component {
 
   waitTurns = () => {
     this.props.playSound("click");
+    this.updatePlayerCards([], [], []);
+    this.setState({
+      ...this.state,
+      isPlayerTurn: false
+    });
     this.props.playerWait();
-    this.updatePlayerCards([],[],[]);
     setTimeout(() => {
       this.props.endTurn();
     }, 1200);
@@ -137,14 +172,13 @@ class Player extends Component {
 
   confirmCards = () => {
     if (!this.state.selectedCards.length) return;
-    this.props.playSound("click");
+    // this.props.playSound("click");
     const { makePlayerMove } = this.props;
     makePlayerMove(this.state.selectedCards);
+    this.updatePlayerCards([], [], []);
     this.setState({
       ...this.state,
-      selectedCards: [],
-      availableCards: [],
-      possibleCards: []
+      isPlayerTurn: false
     });
   };
 
@@ -398,7 +432,7 @@ class Player extends Component {
           : false,
       transitionsOn = true;
     let transformationValue = this.getTransformationValue();
-
+    let renderedCard = 1;
     return (
       <Aux>
         <div className={"flex-container cards-container"}>
@@ -408,33 +442,36 @@ class Player extends Component {
               this.state.availableCards,
               this.state.possibleCards,
               this.state.selectedCards
-            ).map((card, index) => (
-              <CSSTransition
-                key={`${card.type}_${card.weight}`}
-                transitionDelay={{
-                  enter: this.isFirstTurn() ? index * 100 : 0
-                }}
-                transitionAppear={{ transitionsOn }}
-                defaultStyle={{
-                  transform: `translate(${transformationValue.x}px, ${
-                    transformationValue.y
-                  }px)`
-                }}
-                enterStyle={{
-                  transform: transit("translate(0, 0)", 300, "ease-in-out")
-                }}
-                activeStyle={{ transform: "translate(0, 0)" }}
-                active={transitionsOn}
-              >
-                <Card
+            ).map((card, index) => {
+              renderedCard += 1;
+              return (
+                <CSSTransition
                   key={`${card.type}_${card.weight}`}
-                  clickOwnCard={this.clickOwnCard}
-                  card={card}
-                  index={index}
-                  cardClass={card.class + " cardsInHand"}
-                />
-              </CSSTransition>
-            ))}
+                  transitionDelay={{
+                    enter: renderedCard * 50
+                  }}
+                  transitionAppear={{ transitionsOn }}
+                  defaultStyle={{
+                    transform: `translate(${transformationValue.x}px, ${
+                      transformationValue.y
+                    }px)`
+                  }}
+                  enterStyle={{
+                    transform: transit("translate(0, 0)", 250, "ease-in-out")
+                  }}
+                  activeStyle={{ transform: "translate(0, 0)" }}
+                  active={transitionsOn}
+                >
+                  <Card
+                    key={`${card.type}_${card.weight}`}
+                    clickOwnCard={this.clickOwnCard}
+                    card={card}
+                    index={index}
+                    cardClass={card.class + " cardsInHand"}
+                  />
+                </CSSTransition>
+              );
+            })}
           </div>
           <WaitIcon waitTurn={this.props.gameState.player.wait} />
         </div>

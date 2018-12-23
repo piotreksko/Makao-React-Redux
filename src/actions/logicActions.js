@@ -99,6 +99,15 @@ export function addToPile(cards, who) {
     dispatch(statsActions.updateLocalStat("movesCount"));
     dispatch(statsActions.updateGlobalStat("movesCount"));
 
+    const randomSoundNumber = Math.floor(Math.random() * 3) + 1;
+
+    for (let i = 0; i < cards.length; i++) {
+      setTimeout(
+        () => dispatch(playSound(`pick_card${randomSoundNumber}`)),
+        (i * 250)
+      );
+    }
+
     cards = getRandomTransformValues(cards);
     cards = cards.map(card => {
       card.isFromPlayer = isFromPlayer;
@@ -202,8 +211,16 @@ export function takeCards(who) {
       ..._.cloneDeep(gameState[who].cards)
     ]);
 
+    const randomSoundNumber = Math.floor(Math.random() * 3) + 1;
+
     if (who === "player") dispatch(updatePlayerCards(newCardsWithTakenCards));
     else dispatch(updateCpuCards(newCardsWithTakenCards));
+    for (let i = 0; i < howMany; i++) {
+      setTimeout(
+        () => dispatch(playSound(`pick_card${randomSoundNumber}`)),
+        50+(i * 200)
+      );
+    }
 
     if (gameState.cardsToTake > 1) dispatch(updateGameFactor("cardsToTake", 1));
     if (gameState.jackActive)
@@ -235,6 +252,7 @@ export function makePlayerMove(cards) {
     if (!modals.ace && !modals.jack) {
       setTimeout(() => {
         dispatch(makeCpuMove());
+        dispatch(checkMacaoAndWin());
       }, 800);
       dispatch(checkMacaoAndWin());
     }

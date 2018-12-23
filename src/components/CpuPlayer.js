@@ -14,11 +14,11 @@ class CpuPlayer extends PureComponent {
           {this.props.cpuPlayer.cards.map((card, index) => (
                           <CSSTransition
                           key={`${card.type}_${card.weight}`}
-                          transitionDelay={{ enter: index*100 }}
+                          transitionDelay={{ enter: (index+1)*50 }}
                           transitionAppear={{ transitionsOn }}
                           defaultStyle={{ transform: "translate(-100px, 200px)" }}
                           enterStyle={{
-                            transform: transit("translate(0, 0)", 300, "ease-in-out")
+                            transform: transit("translate(0, 0)", 250, "ease-in-out")
                           }}
                           activeStyle={{ transform: "translate(0, 0)" }}
                           active={transitionsOn}
