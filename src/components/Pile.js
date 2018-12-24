@@ -17,7 +17,7 @@ export default function Pile(props) {
       {props.cards.map((card, idx) => (
         <CSSTransition
           key={idx}
-          // transitionDelay={{ enter: 50 }}
+          transitionDelay={{ enter: 50 }}
           transitionAppear={{ omegalul }}
           defaultStyle={{
             transform: `translate(-50px, ${getPlusMinus(card)}200px)`

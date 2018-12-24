@@ -7,7 +7,7 @@ export default function ActionButtons(props) {
       <button
         onClick={props.confirmCards}
         className={
-          "btn btn-success mr-2 " + (!props.hasSelected && !props.isPlayerTurn ? "disabled" : "")
+          "btn btn-success mr-2 " + (!props.hasSelected || !props.isPlayerTurn ? "disabled" : "")
         }
         data-toggle="confirmation"
         data-singleton="true"

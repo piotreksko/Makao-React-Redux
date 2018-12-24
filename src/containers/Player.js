@@ -35,11 +35,13 @@ class Player extends Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     const firstTurn = this.isFirstTurn();
-
     const changed = this.haveCardsChanged(nextProps, nextState);
     const ended = this.hasCpuEndedTurn(nextProps);
+    debugger;
+    const playerTurnChanged = nextProps.gameState.isPlayerTurn !== this.props.gameState.isPlayerTurn;
 
-    if (changed || ended || firstTurn) return true;
+    // if (changed || ended || firstTurn) return true;
+    if (changed || ended || firstTurn || playerTurnChanged) return true;
     else return false;
   }
 

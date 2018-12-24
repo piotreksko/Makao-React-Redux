@@ -101,7 +101,6 @@ const mapDispatchToProps = dispatch => {
     fetchStats: () => dispatch(statsActions.fetchStats()),
     updateLocalStat: (stat, value) =>
       dispatch(statsActions.updateLocalStat(stat, value)),
-    restartGame: () => dispatch({ type: logicActions.RESTART_GAME }),
     playSound: soundName => dispatch(soundActions.playSound(soundName))
   };
 };

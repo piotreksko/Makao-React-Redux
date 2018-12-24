@@ -77,7 +77,7 @@ export class GameView extends Component {
             config={confettiConfig}
           />
         </div>
-        <Header />
+        <Header restartGame={this.restartGame}/>
         <CpuPlayer cpuPlayer={gameState.cpuPlayer} />
         <div className="flex-container middle cards-container">
           <Deck
@@ -115,7 +115,7 @@ const mapDispatchToProps = dispatch => {
       dispatch(logicActions.makeCpuMove());
       dispatch(logicActions.checkMacaoAndWin());
     },
-    restartGame: () => dispatch({ type: logicActions.RESTART_GAME }),
+    restartGame: () => dispatch(logicActions.restartGame()),
     playSound: soundName => dispatch(soundActions.playSound(soundName))
   };
 };
