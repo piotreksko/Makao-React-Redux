@@ -11,7 +11,6 @@ import Deck from "../components/Deck";
 import Pile from "../components/Pile";
 import Confetti from "react-dom-confetti";
 import CpuPlayer from "../components/CpuPlayer";
-import _ from "lodash";
 
 export class GameView extends Component {
   constructor(props) {
@@ -81,7 +80,12 @@ export class GameView extends Component {
         <Header />
         <CpuPlayer cpuPlayer={gameState.cpuPlayer} />
         <div className="flex-container middle cards-container">
-          <Deck takeCard={this.takeCards} playerCanMove={playerCanMove} cardsInDeck={gameState.deck.length} />
+          <Deck
+            takeCard={this.takeCards}
+            playerCanMove={playerCanMove}
+            cardsInDeck={gameState.deck.length}
+            isPlayerTurn={gameState.isPlayerTurn}
+          />
           <Pile cards={pile} />
           <Icons />
         </div>

@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import ReactDOM from "react-dom";
 import { connect } from "react-redux";
 import _ from "lodash";
 import Aux from "../hoc/Auxilliary";
@@ -17,34 +16,24 @@ class Player extends Component {
     this.state = {
       availableCards: [],
       possibleCards: [],
-      selectedCards: [],
-      isPlayerTurn: true
+      selectedCards: []
     };
   }
 
   componentWillMount() {
-    if (this.props.gameState.playerTurn) {
-      this.setState({
-        ...this.state,
-        isPlayerTurn: true
-      });
+    if (this.props.gameState.isPlayerTurn) {
       setTimeout(() => {
         this.checkAvailableCards();
       }, 1200);
     } else {
-      this.setState({
-        ...this.state,
-        isPlayerTurn: false
-      });
       setTimeout(() => {
         this.props.endTurn();
-      }, 1000);
+      }, 800);
     }
     this.props.playSound("shuffle");
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    debugger;
     const firstTurn = this.isFirstTurn();
 
     const changed = this.haveCardsChanged(nextProps, nextState);
@@ -55,32 +44,13 @@ class Player extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const ended = this.hasCpuEndedTurn(prevProps);
-    debugger;
-
-    if (prevProps.gameState.player.cards.length < this.props.gameState.player.cards.length){
-      this.setState({
-        ...this.state,
-        isPlayerTurn: false
-      });
-    }
-    
-    if (ended) {
-      this.setState({
-        ...this.state,
-        isPlayerTurn: true
-      });
-    };
-
-
-
     const firstTurn = this.isFirstTurn();
     let clearSelectedCards =
       !_.isEqual(prevProps.gameState.player, this.props.gameState.player) &&
       this.state.selectedCards.length;
     let newSelectedCards = clearSelectedCards ? [] : this.state.selectedCards;
 
-    if (this.state.isPlayerTurn && !firstTurn)
+    if (this.props.gameState.isPlayerTurn && !firstTurn)
       this.checkAvailableCards(newSelectedCards);
   }
 
@@ -104,7 +74,7 @@ class Player extends Component {
 
   waitTurns = () => {
     this.props.playSound("click");
-    this.updatePlayerCards([], [], []);
+    // this.updatePlayerCards([], [], []);
     this.setState({
       ...this.state,
       isPlayerTurn: false
@@ -176,10 +146,11 @@ class Player extends Component {
     const { makePlayerMove } = this.props;
     makePlayerMove(this.state.selectedCards);
     this.updatePlayerCards([], [], []);
-    this.setState({
-      ...this.state,
-      isPlayerTurn: false
-    });
+
+    // this.setState({
+    //   ...this.state,
+    //   selectedCards: []
+    // });
   };
 
   checkAvailableCards = newSelectedCards => {
@@ -422,6 +393,7 @@ class Player extends Component {
   }
 
   render() {
+    CSSTransition.childContextTypes = {};
     const gameState = this.props.gameState,
       playerCards = gameState.player.cards,
       pileTopCard = gameState.pile[gameState.pile.length - 1],
@@ -478,6 +450,7 @@ class Player extends Component {
         <ActionButtons
           confirmCards={this.confirmCards}
           hasSelected={this.state.selectedCards.length}
+          isPlayerTurn={gameState.isPlayerTurn}
           waitTurn={this.waitTurns}
           playerCanWait={playerCanWait}
         />

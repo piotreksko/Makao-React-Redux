@@ -13,7 +13,7 @@ const Deck = props => {
       <CardBack
         key={i}
         number={i}
-        highlight={i === 0 ? true : false}
+        highlight={i === 0 && props.isPlayerTurn ? true : false}
         deckCard={true}
         takeCard={props.takeCard}
         playerCanMove={props.playerCanMove}

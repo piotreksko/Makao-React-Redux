@@ -4,6 +4,7 @@ import * as statsActions from "./statsActions";
 import { checkSoundsToPlay, playSound } from "./soundActions";
 export const UPDATE_PLAYER_CARDS = "UPDATE_PLAYER_CARDS";
 export const UPDATE_CPU_CARDS = "UPDATE_CPU_CARDS";
+export const UPDATE_WHOS_TURN = 'UPDATE_WHOS_TURN';
 export const TAKE_FROM_DECK = "TAKE_FROM_DECK";
 export const ADD_TO_PILE = "ADD_TO_PILE";
 export const UPDATE_GAME_FACTOR = "UPDATE_GAME_FACTOR";
@@ -90,6 +91,7 @@ export function waitTurns(who) {
     } else {
       dispatch({ type: "WAIT_TURNS", waitTurns: gameState[who].wait - 1, who });
     }
+    dispatch(updateWhosTurn(who));
   };
 }
 
@@ -98,13 +100,14 @@ export function addToPile(cards, who) {
     let isFromPlayer = who === "player";
     dispatch(statsActions.updateLocalStat("movesCount"));
     dispatch(statsActions.updateGlobalStat("movesCount"));
+    dispatch(updateWhosTurn(who));
 
     const randomSoundNumber = Math.floor(Math.random() * 3) + 1;
 
     for (let i = 0; i < cards.length; i++) {
       setTimeout(
         () => dispatch(playSound(`pick_card${randomSoundNumber}`)),
-        (i * 250)
+        i * 150
       );
     }
 
@@ -117,6 +120,13 @@ export function addToPile(cards, who) {
       type: "ADD_TO_PILE",
       cards: cards
     });
+  };
+}
+
+export function updateWhosTurn(who) {
+  return (dispatch, getState) => {
+    const isPlayerTurn = who !== 'player';
+    dispatch({ type: UPDATE_WHOS_TURN, isPlayerTurn });
   };
 }
 
@@ -193,6 +203,7 @@ export function takeCards(who) {
     const gameState = getState().gameState;
     dispatch(statsActions.updateLocalStat("movesCount"));
     dispatch(statsActions.updateGlobalStat("movesCount"));
+    dispatch(updateWhosTurn(who));
 
     let howMany = gameState.cardsToTake - 1;
     if (!howMany) howMany = 1;
@@ -218,7 +229,7 @@ export function takeCards(who) {
     for (let i = 0; i < howMany; i++) {
       setTimeout(
         () => dispatch(playSound(`pick_card${randomSoundNumber}`)),
-        50+(i * 200)
+        50 + i * 150
       );
     }
 
@@ -247,14 +258,14 @@ export function makePlayerMove(cards) {
     dispatch(addToPile(cards, "player"));
     dispatch(updatePlayerCards(newPlayerCards));
 
+    dispatch(checkMacaoAndWin());
     const modals = getState().modals;
-
-    if (!modals.ace && !modals.jack) {
+    
+    if (!modals.ace && !modals.jack && !modals.gameOver) {
       setTimeout(() => {
         dispatch(makeCpuMove());
         dispatch(checkMacaoAndWin());
-      }, 800);
-      dispatch(checkMacaoAndWin());
+      }, 700);
     }
   };
 }

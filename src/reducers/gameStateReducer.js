@@ -3,6 +3,7 @@ import {
   UPDATE_PLAYER_CARDS,
   UPDATE_CPU_CARDS,
   UPDATE_GAME_FACTOR,
+  UPDATE_WHOS_TURN,
   ADD_TO_PILE,
   TAKE_FROM_DECK,
   CHANGE_SUIT,
@@ -29,7 +30,7 @@ const initialState = () => {
     deck: [],
     chosenWeight: "",
     chosenType: "",
-    nextTurn: 0,
+    isPlayerTurn: 0,
     jackActive: 0,
     cardsToTake: 1,
     waitTurn: 0,
@@ -51,7 +52,7 @@ const initialState = () => {
     });
   })();
 
-  initGame.playerTurn = Math.round(Math.random() * 1);
+  initGame.isPlayerTurn = Math.round(Math.random() * 1);
   initGame.deck = _.shuffle(initGame.deck);
 
   // Deal cards
@@ -135,6 +136,11 @@ export default function(state = initialState(), action) {
       return {
         ...state,
         [action.factor]: action.value
+      };
+    case UPDATE_WHOS_TURN:
+      return {
+        ...state,
+        isPlayerTurn: action.isPlayerTurn
       };
     case RESTART_GAME:
       return initialState();
