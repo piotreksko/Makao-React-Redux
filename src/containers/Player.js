@@ -37,7 +37,8 @@ class Player extends Component {
     const firstTurn = this.isFirstTurn();
     const changed = this.haveCardsChanged(nextProps, nextState);
     const ended = this.hasCpuEndedTurn(nextProps);
-    const playerTurnChanged = nextProps.gameState.isPlayerTurn !== this.props.gameState.isPlayerTurn;
+    const playerTurnChanged =
+      nextProps.gameState.isPlayerTurn !== this.props.gameState.isPlayerTurn;
 
     // if (changed || ended || firstTurn) return true;
     if (changed || ended || firstTurn || playerTurnChanged) return true;
@@ -138,7 +139,11 @@ class Player extends Component {
   };
 
   confirmCards = () => {
-    if (!this.state.selectedCards.length && !this.props.gameState.firstCardChecked) return;
+    if (
+      !this.state.selectedCards.length &&
+      !this.props.gameState.firstCardChecked
+    )
+      return;
     // this.props.playSound("click");
     this.props.makePlayerMove(this.state.selectedCards);
     this.updatePlayerCards([], [], []);
@@ -169,7 +174,8 @@ class Player extends Component {
       firstCardChecked
     } = this.props.gameState;
     let playerCards = player.cards;
-    if (firstCardChecked) playerCards = playerCards.filter((card) => card.isForCheck);
+    if (firstCardChecked)
+      playerCards = playerCards.filter(card => card.isForCheck);
 
     let pileTopCard = _.cloneDeep(pile[pile.length - 1]),
       newAvailable = [],
@@ -246,7 +252,8 @@ class Player extends Component {
       firstCardChecked
     } = this.props.gameState;
     let playerCards = player.cards;
-    if (!firstCardChecked) playerCards = playerCards.filter((card) => card.isForCheck);
+    if (firstCardChecked)
+      playerCards = playerCards.filter(card => card.isForCheck);
 
     let pileTopCard = _.cloneDeep(pile[pile.length - 1]),
       newAvailable = [],
@@ -400,6 +407,18 @@ class Player extends Component {
       transitionsOn = true;
     let transformationValue = this.getTransformationValue();
     let renderedCard = 1;
+    let assignCardClass = card => {
+      debugger;
+      if (card.isForCheck) {
+        if (card.class) {
+          return "for-check-available cardsInHand";
+        } else {
+          return "for-check-unavailable cardsInHand";
+        }
+      }
+      return card.class + " cardsInHand";
+    };
+    
     return (
       <Aux>
         <div className={"flex-container cards-container"}>
@@ -434,7 +453,7 @@ class Player extends Component {
                     clickOwnCard={this.clickOwnCard}
                     card={card}
                     index={index}
-                    cardClass={!card.isForCheck ? card.class + " cardsInHand" : 'for-check cardsInHand'}
+                    cardClass={assignCardClass(card)}
                   />
                 </CSSTransition>
               );

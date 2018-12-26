@@ -42,6 +42,7 @@ export class GameView extends Component {
   // }
 
   takeCards() {
+    if (this.props.gameState.firstCardChecked) return;
     this.props.takeCards(this.props.gameState.cardsToTake);
     if (this.props.gameState.firstCardChecked) {
       setTimeout(() => {
@@ -87,6 +88,7 @@ export class GameView extends Component {
             playerCanMove={playerCanMove}
             cardsInDeck={gameState.deck.length}
             isPlayerTurn={gameState.isPlayerTurn}
+            firstCardChecked={gameState.firstCardChecked}
           />
           <Pile cards={pile} />
           <Icons />

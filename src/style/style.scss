@@ -174,12 +174,15 @@ body {
   }
   @include box-shadow(0px, 0px, 3px, 3px, rgba(52, 152, 218, 0.9));
 }
-.for-check {
+.for-check-available {
   &:hover {
     @extend %hoverable-card;
   }
   @include transform(translate(0px, -10px));
   @include box-shadow(0px, 0px, 5px, 5px, rgba(218, 179, 52, 0.9));
+}
+.for-check-unavailable {
+  @include transform(translate(0px, -10px));
 }
 .deckPossible {
   &:hover {
