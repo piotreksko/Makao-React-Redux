@@ -31,6 +31,7 @@ const initialState = () => {
     chosenWeight: "",
     chosenType: "",
     isPlayerTurn: 0,
+    firstCardChecked: false,
     jackActive: 0,
     cardsToTake: 1,
     waitTurn: 0,

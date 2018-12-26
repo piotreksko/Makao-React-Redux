@@ -18,6 +18,11 @@ class Card extends Component {
       }
     }
 
+    // debugger;
+    // if (this.props.card.isForCheck) {
+    //   this.props.cardClass += ' for-check';
+    // }
+
     return (
       <div
         onClick={

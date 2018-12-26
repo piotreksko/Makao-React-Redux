@@ -43,9 +43,11 @@ export class GameView extends Component {
 
   takeCards() {
     this.props.takeCards(this.props.gameState.cardsToTake);
-    setTimeout(() => {
-      this.props.endTurn();
-    }, 1000);
+    if (this.props.gameState.firstCardChecked) {
+      setTimeout(() => {
+        this.props.endTurn();
+      }, 1000);
+    }
   }
 
   restartGame() {
@@ -77,7 +79,7 @@ export class GameView extends Component {
             config={confettiConfig}
           />
         </div>
-        <Header restartGame={this.restartGame}/>
+        <Header restartGame={this.restartGame} />
         <CpuPlayer cpuPlayer={gameState.cpuPlayer} />
         <div className="flex-container middle cards-container">
           <Deck

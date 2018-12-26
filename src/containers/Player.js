@@ -37,7 +37,6 @@ class Player extends Component {
     const firstTurn = this.isFirstTurn();
     const changed = this.haveCardsChanged(nextProps, nextState);
     const ended = this.hasCpuEndedTurn(nextProps);
-    debugger;
     const playerTurnChanged = nextProps.gameState.isPlayerTurn !== this.props.gameState.isPlayerTurn;
 
     // if (changed || ended || firstTurn) return true;
@@ -77,14 +76,10 @@ class Player extends Component {
   waitTurns = () => {
     this.props.playSound("click");
     // this.updatePlayerCards([], [], []);
-    this.setState({
-      ...this.state,
-      isPlayerTurn: false
-    });
     this.props.playerWait();
     setTimeout(() => {
       this.props.endTurn();
-    }, 1200);
+    }, 700);
   };
 
   clickOwnCard = (card, index) => {
@@ -143,16 +138,10 @@ class Player extends Component {
   };
 
   confirmCards = () => {
-    if (!this.state.selectedCards.length) return;
+    if (!this.state.selectedCards.length && !this.props.gameState.firstCardChecked) return;
     // this.props.playSound("click");
-    const { makePlayerMove } = this.props;
-    makePlayerMove(this.state.selectedCards);
+    this.props.makePlayerMove(this.state.selectedCards);
     this.updatePlayerCards([], [], []);
-
-    // this.setState({
-    //   ...this.state,
-    //   selectedCards: []
-    // });
   };
 
   checkAvailableCards = newSelectedCards => {
@@ -176,9 +165,11 @@ class Player extends Component {
       waitTurn,
       jackActive,
       battleCardActive,
-      pile
+      pile,
+      firstCardChecked
     } = this.props.gameState;
-    const playerCards = player.cards;
+    let playerCards = player.cards;
+    if (firstCardChecked) playerCards = playerCards.filter((card) => card.isForCheck);
 
     let pileTopCard = _.cloneDeep(pile[pile.length - 1]),
       newAvailable = [],
@@ -251,9 +242,11 @@ class Player extends Component {
       chosenWeight,
       jackActive,
       battleCardActive,
-      pile
+      pile,
+      firstCardChecked
     } = this.props.gameState;
-    const playerCards = player.cards;
+    let playerCards = player.cards;
+    if (!firstCardChecked) playerCards = playerCards.filter((card) => card.isForCheck);
 
     let pileTopCard = _.cloneDeep(pile[pile.length - 1]),
       newAvailable = [],
@@ -441,7 +434,7 @@ class Player extends Component {
                     clickOwnCard={this.clickOwnCard}
                     card={card}
                     index={index}
-                    cardClass={card.class + " cardsInHand"}
+                    cardClass={!card.isForCheck ? card.class + " cardsInHand" : 'for-check cardsInHand'}
                   />
                 </CSSTransition>
               );
@@ -455,6 +448,7 @@ class Player extends Component {
           isPlayerTurn={gameState.isPlayerTurn}
           waitTurn={this.waitTurns}
           playerCanWait={playerCanWait}
+          firstCardChecked={gameState.firstCardChecked}
         />
       </Aux>
     );
@@ -473,7 +467,7 @@ const mapDispatchToProps = dispatch => {
     makePlayerMove: cards => dispatch(logicActions.makePlayerMove(cards)),
     playerWait: () => dispatch(logicActions.waitTurns("player")),
     endTurn: () => {
-      dispatch(logicActions.updateGameFactor("playerTurn", false));
+      dispatch(logicActions.updateGameFactor("isPlayerTurn", false));
       dispatch(logicActions.makeCpuMove());
       dispatch(logicActions.checkMacaoAndWin());
     },

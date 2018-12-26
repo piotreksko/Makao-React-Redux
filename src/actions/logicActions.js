@@ -209,10 +209,12 @@ export function checkWin(gameState) {
 export function takeCards(who) {
   return function(dispatch, getState) {
     const gameState = getState().gameState;
+    const firstCardChecked = gameState.firstCardChecked;
     dispatch(statsActions.updateLocalStat("movesCount"));
     dispatch(statsActions.updateGlobalStat("movesCount"));
 
-    let howMany = gameState.cardsToTake - 1;
+    debugger;
+    let howMany = firstCardChecked ? 1 : gameState.cardsToTake - 1;
     if (!howMany) howMany = 1;
 
     // Check if there are enough cards on deck
@@ -223,7 +225,9 @@ export function takeCards(who) {
     }
     dispatch({ type: "TAKE_FROM_DECK", howMany });
 
-    const cardsToTake = deck.slice(deck.length - howMany, deck.length);
+    let cardsToTake = deck.slice(deck.length - howMany, deck.length);
+    if (!firstCardChecked) cardsToTake[0].isForCheck = true;
+
     let newCardsWithTakenCards = sortCards([
       ...cardsToTake,
       ..._.cloneDeep(gameState[who].cards)
@@ -239,13 +243,19 @@ export function takeCards(who) {
       }, (i + 1) * 80 + 320);
     }
 
-    if (gameState.cardsToTake > 1) dispatch(updateGameFactor("cardsToTake", 1));
-    if (gameState.jackActive)
-      dispatch(updateGameFactor("jackActive", gameState.jackActive - 1));
-    if (gameState.battleCardActive)
-      dispatch(updateGameFactor("battleCardActive", false));
+    if (firstCardChecked) {
+      dispatch(updateGameFactor("firstCardChecked", false));
+      if (gameState.cardsToTake > 1)
+        dispatch(updateGameFactor("cardsToTake", 1));
+      if (gameState.jackActive)
+        dispatch(updateGameFactor("jackActive", gameState.jackActive - 1));
+      if (gameState.battleCardActive)
+        dispatch(updateGameFactor("battleCardActive", false));
 
-    dispatch(updateWhosTurn(who));
+      dispatch(updateWhosTurn(who));
+    } else {
+      dispatch(updateGameFactor("firstCardChecked", true));
+    }
   };
 }
 
@@ -258,15 +268,32 @@ function nobodyIsWaiting() {
 
 export function makePlayerMove(cards) {
   return function(dispatch, getState) {
+    const gameState = getState().gameState;
+
     // Clear cards from class key
-    cards = cards.map(card => (card = _.omit(card, "class")));
+    if (cards) {
+      cards = cards.map(card => (card = _.omit(card, "class")));
+      cards = cards.map(card => (card = _.omit(card, "isForCheck")));
+    }
 
-    const newPlayerCards = dispatch(verifyUsedCards(cards));
+    debugger;
+    let newPlayerCards = dispatch(verifyUsedCards(cards));
+    if (gameState.firstCardChecked) {
+      newPlayerCards = gameState.player.cards.map(
+        card => (card = _.omit(card, "isForCheck"))
+      );
+    }
 
-    dispatch(addToPile(cards, "player"));
+    if (cards.length) dispatch(addToPile(cards, "player"));
     dispatch(updatePlayerCards(newPlayerCards));
 
     dispatch(checkMacaoAndWin());
+
+    if (gameState.firstCardChecked) {
+      dispatch(updateWhosTurn("player"));
+      dispatch(updateGameFactor("firstCardChecked", false));
+    }
+
     const modals = getState().modals;
 
     if (!modals.ace && !modals.jack && !modals.gameOver) {
@@ -281,57 +308,71 @@ export function makePlayerMove(cards) {
 function verifyUsedCards(cards) {
   return function(dispatch, getState) {
     const { gameState } = getState();
-    let { cardsToTake, waitTurn, jackActive, battleCardActive } = gameState;
-    let gameFactors = { cardsToTake, waitTurn, jackActive, battleCardActive };
+    let {
+      cardsToTake,
+      waitTurn,
+      jackActive,
+      battleCardActive,
+      firstCardChecked
+    } = gameState;
+    let gameFactors = {
+      cardsToTake,
+      waitTurn,
+      jackActive,
+      battleCardActive,
+      firstCardChecked
+    };
     let newPlayerCards = _.cloneDeep(gameState.player.cards);
 
-    cards.forEach(card => {
-      switch (card.type) {
-        case "2":
-          if (nobodyIsWaiting()) gameFactors.cardsToTake += 2;
-          break;
-        case "3":
-          if (nobodyIsWaiting()) gameFactors.cardsToTake += 3;
-          break;
-        case "4":
-          if (!gameState.cpuPlayer.wait) {
-            gameFactors.waitTurn += 1;
-          }
-          break;
-        case "jack":
-          dispatch(checkWin(gameState));
-          dispatch({ type: "SHOW_MODAL", modal: "jack" });
-          gameFactors.jackActive = 3;
-          break;
-        case "ace":
-          dispatch(checkWin(gameState));
-          dispatch({ type: "SHOW_MODAL", modal: "ace" });
-          break;
-        case "king":
-          if (
-            card.weight === "hearts" ||
-            (card.weight === "spades" && nobodyIsWaiting())
-          ) {
-            gameFactors.cardsToTake += 5;
+    if (cards.length) {
+      cards.forEach(card => {
+        switch (card.type) {
+          case "2":
+            if (nobodyIsWaiting()) gameFactors.cardsToTake += 2;
             break;
-          }
-          //Kings of clubs and diamonds nullify amount of cards to be taken
-          else {
-            gameFactors.cardsToTake = 1;
+          case "3":
+            if (nobodyIsWaiting()) gameFactors.cardsToTake += 3;
             break;
-          }
-        default:
-          break;
-      }
+          case "4":
+            if (!gameState.cpuPlayer.wait) {
+              gameFactors.waitTurn += 1;
+            }
+            break;
+          case "jack":
+            dispatch(checkWin(gameState));
+            dispatch({ type: "SHOW_MODAL", modal: "jack" });
+            gameFactors.jackActive = 3;
+            break;
+          case "ace":
+            dispatch(checkWin(gameState));
+            dispatch({ type: "SHOW_MODAL", modal: "ace" });
+            break;
+          case "king":
+            if (
+              card.weight === "hearts" ||
+              (card.weight === "spades" && nobodyIsWaiting())
+            ) {
+              gameFactors.cardsToTake += 5;
+              break;
+            }
+            //Kings of clubs and diamonds nullify amount of cards to be taken
+            else {
+              gameFactors.cardsToTake = 1;
+              break;
+            }
+          default:
+            break;
+        }
 
-      // Remove cards from playerCards
-      let cardIndexInPlayerCards = newPlayerCards.findIndex(
-        c => card.type === c.type && card.weight === c.weight
-      );
-      newPlayerCards.splice(cardIndexInPlayerCards, 1);
-    });
+        // Remove cards from playerCards
+        let cardIndexInPlayerCards = newPlayerCards.findIndex(
+          c => card.type === c.type && card.weight === c.weight
+        );
+        newPlayerCards.splice(cardIndexInPlayerCards, 1);
+      });
+      dispatch(checkGameFactorsToUpdate(gameFactors));
+    }
 
-    dispatch(checkGameFactorsToUpdate(gameFactors));
     return newPlayerCards;
   };
 }
