@@ -408,7 +408,6 @@ class Player extends Component {
     let transformationValue = this.getTransformationValue();
     let renderedCard = 1;
     let assignCardClass = card => {
-      debugger;
       if (card.isForCheck) {
         if (card.class) {
           return "for-check-available cardsInHand";
