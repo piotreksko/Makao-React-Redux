@@ -91,7 +91,6 @@ export function waitTurns(who) {
     } else {
       dispatch({ type: "WAIT_TURNS", waitTurns: gameState[who].wait - 1, who });
     }
-    dispatch(updateWhosTurn(who));
   };
 }
 
@@ -100,17 +99,11 @@ export function addToPile(cards, who) {
     let isFromPlayer = who === "player";
     dispatch(statsActions.updateLocalStat("movesCount"));
     dispatch(statsActions.updateGlobalStat("movesCount"));
-    dispatch(updateWhosTurn(who));
 
+    debugger;
     const randomSoundNumber = Math.floor(Math.random() * 3) + 1;
 
     setTimeout(() => dispatch(playSound(`pick_card${randomSoundNumber}`)), 350);
-    // for (let i = 0; i < cards.length; i++) {
-    //   setTimeout(
-    //     () => dispatch(playSound(`pick_card${randomSoundNumber}`)),
-    //     (i + 1) * 50 + 300
-    //   );
-    // }
 
     cards = getRandomTransformValues(cards);
     cards = cards.map(card => {
@@ -121,6 +114,11 @@ export function addToPile(cards, who) {
       type: "ADD_TO_PILE",
       cards: cards
     });
+
+    const gameState = getState().gameState;
+    if (gameState.firstCardChecked) {
+      updateGameFactor("firstCardChecked", false);
+    }
   };
 }
 
@@ -215,7 +213,7 @@ export function takeCards(who) {
 
     debugger;
     let howMany = !firstCardChecked ? 1 : gameState.cardsToTake - 2;
-    if (!howMany) howMany = 1;
+    if (howMany < 1) howMany = 1;
 
     // Check if there are enough cards on deck
     let deck = gameState.deck;
@@ -228,17 +226,16 @@ export function takeCards(who) {
 
     let cardsToTake = deck.slice(deck.length - howMany, deck.length);
     if (!firstCardChecked) cardsToTake[0].isForCheck = true;
+    else {
+      cardsToTake = cardsToTake.map(
+        card => (card = _.omit(card, "isForCheck"))
+      );
+    }
 
     let newCardsWithTakenCards = sortCards([
       ...cardsToTake,
       ..._.cloneDeep(gameState[who].cards)
     ]);
-
-    if (firstCardChecked) {
-      newCardsWithTakenCards = newCardsWithTakenCards.map(
-        card => (card = _.omit(card, "isForCheck"))
-      );
-    }
 
     if (who === "player") dispatch(updatePlayerCards(newCardsWithTakenCards));
     else dispatch(updateCpuCards(newCardsWithTakenCards));
@@ -259,7 +256,6 @@ export function takeCards(who) {
       if (gameState.battleCardActive)
         dispatch(updateGameFactor("battleCardActive", false));
 
-      dispatch(updateWhosTurn(who));
     } else {
       dispatch(updateGameFactor("firstCardChecked", true));
     }
@@ -284,24 +280,36 @@ export function makePlayerMove(cards) {
 
     debugger;
     let newPlayerCards = dispatch(verifyUsedCards(cards));
-    if (gameState.firstCardChecked && gameState.cardsToTake > 1) {
-      dispatch(updateWhosTurn("player"));
-      dispatch(takeCards("player"));
+
+    if (gameState.firstCardChecked) {
+      newPlayerCards = newPlayerCards.map(
+        card => (card = _.omit(card, "isForCheck"))
+      );
+      dispatch(updatePlayerCards(newPlayerCards));
+      if (gameState.cardsToTake > 1) dispatch(takeCards("player"));
     }
 
-    if (cards.length) dispatch(addToPile(cards, "player"));
-    dispatch(updatePlayerCards(newPlayerCards));
+    if (cards.length) {
+      dispatch(addToPile(cards, "player"));
+      dispatch(updatePlayerCards(newPlayerCards));
+    }
 
     dispatch(checkMacaoAndWin());
 
+    if (gameState.firstCardChecked)
+      dispatch(updateGameFactor("firstCardChecked", false));
+
     const modals = getState().modals;
 
+    dispatch(updateWhosTurn('player'));
     if (!modals.ace && !modals.jack && !modals.gameOver) {
+
       setTimeout(() => {
         dispatch(makeCpuMove());
         dispatch(checkMacaoAndWin());
       }, 700);
     }
+
   };
 }
 
@@ -393,10 +401,10 @@ function checkGameFactorsToUpdate(gameFactors) {
 
 export function makeCpuMove() {
   return function(dispatch, getState) {
-    let cpuWait = getState().gameState.cpuPlayer.wait;
+    const gameState = getState().gameState;
+    let cpuWait = gameState.cpuPlayer.wait;
 
     if (getState().modals.gameOver) return;
-
     if (cpuWait) return dispatch(noCardsToUse());
     let availableCards = dispatch(getAvailableCards());
 
@@ -405,6 +413,10 @@ export function makeCpuMove() {
     } else {
       dispatch(noCardsToUse());
     }
+
+    if (getState().gameState.firstCardChecked) updateGameFactor("firstCardChecked", false);
+    dispatch(updateWhosTurn('player'));
+
   };
 }
 
@@ -419,6 +431,7 @@ function getAvailableCards() {
       pile,
       firstCardChecked
     } = gameState;
+    debugger;
 
     const pileTopCard = pile[pile.length - 1];
     const cards = !firstCardChecked
@@ -467,12 +480,15 @@ function hasCardsAvailable(availableCards) {
 function noCardsToUse() {
   return function(dispatch, getState) {
     const gameState = getState().gameState;
-
+    debugger;
     if (gameState.waitTurn > 0 || gameState.cpuPlayer.wait) {
       dispatch(waitTurns("cpuPlayer"));
     } else {
-      dispatch(takeCards("cpuPlayer"));
-      if (!gameState.firstCardChecked) setTimeout(dispatch(makeCpuMove()), 400);
+      if (gameState.firstCardChecked && gameState.cardsToTake > 1)
+        dispatch(takeCards("cpuPlayer"));
+      if (!gameState.firstCardChecked) {
+        setTimeout(dispatch(makeCpuMove()), 600);
+      }
     }
   };
 }

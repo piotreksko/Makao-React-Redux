@@ -144,7 +144,13 @@ class Player extends Component {
       !this.props.gameState.firstCardChecked
     )
       return;
-    // this.props.playSound("click");
+      
+    if (
+      this.props.gameState.firstCardChecked &&
+      !this.state.selectedCards.length
+    )
+      this.props.playSound("click");
+
     this.props.makePlayerMove(this.state.selectedCards);
     this.updatePlayerCards([], [], []);
   };
@@ -252,8 +258,10 @@ class Player extends Component {
       firstCardChecked
     } = this.props.gameState;
     let playerCards = player.cards;
-    if (firstCardChecked)
+
+    if (firstCardChecked) {
       playerCards = playerCards.filter(card => card.isForCheck);
+    }
 
     let pileTopCard = _.cloneDeep(pile[pile.length - 1]),
       newAvailable = [],
@@ -410,6 +418,9 @@ class Player extends Component {
     let assignCardClass = card => {
       if (card.isForCheck) {
         if (card.class) {
+          if (card.class.includes("topCard")) {
+            return "topCard selected cardsInHand";
+          }
           return "for-check-available cardsInHand";
         } else {
           return "for-check-unavailable cardsInHand";
@@ -417,7 +428,7 @@ class Player extends Component {
       }
       return card.class + " cardsInHand";
     };
-    
+
     return (
       <Aux>
         <div className={"flex-container cards-container"}>
