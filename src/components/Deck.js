@@ -3,7 +3,6 @@ import CardBack from "./cards/CardBack";
 import PropTypes from "prop-types";
 
 const Deck = props => {
-  let deckRef = React.createRef();
   const number = props.cardsInDeck;
   let howManyToRender = parseInt(number / 10) + 2;
   let deckToRender = [];
@@ -13,7 +12,7 @@ const Deck = props => {
       <CardBack
         key={i}
         number={i}
-        highlight={i === 0 && props.isPlayerTurn && !props.firstCardChecked ? true : false}
+        highlight={i === 0 && props.isPlayerTurn ? true : false}
         deckCard={true}
         takeCard={props.takeCard}
         playerCanMove={props.playerCanMove}
@@ -24,7 +23,7 @@ const Deck = props => {
   }
 
   return (
-    <div ref={deckRef} className="deck">
+    <div className="deck">
       {deckToRender}
     </div>
   );

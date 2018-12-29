@@ -42,8 +42,9 @@ export class GameView extends Component {
   // }
 
   takeCards() {
-    if (this.props.gameState.firstCardChecked) return;
-    this.props.takeCards(this.props.gameState.cardsToTake);
+    if (this.props.gameState.firstCardChecked) this.props.makePlayerMove();
+    else this.props.takeCards(this.props.gameState.cardsToTake);
+    
     if (this.props.gameState.firstCardChecked) {
       setTimeout(() => {
         this.props.endTurn();
@@ -111,6 +112,7 @@ const mapDispatchToProps = dispatch => {
   return {
     showModal: modal => dispatch({ type: "SHOW_MODAL", modal: modal }),
     hideModal: modal => dispatch({ type: "HIDE_MODAL", modal: modal }),
+    makePlayerMove: () => dispatch(logicActions.makePlayerMove([])),
     takeCards: () => dispatch(logicActions.takeCards("player")),
     updateGameFactor: (factor, value) =>
       dispatch(logicActions.updateGameFactor(factor, value)),
