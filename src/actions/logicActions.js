@@ -101,7 +101,6 @@ export function addToPile(cards, who) {
     dispatch(statsActions.updateLocalStat("movesCount"));
     dispatch(statsActions.updateGlobalStat("movesCount"));
 
-    debugger;
     const randomSoundNumber = Math.floor(Math.random() * 3) + 1;
 
     setTimeout(() => dispatch(playSound(`pick_card${randomSoundNumber}`)), 350);
@@ -212,7 +211,6 @@ export function takeCards(who) {
     dispatch(statsActions.updateLocalStat("movesCount"));
     dispatch(statsActions.updateGlobalStat("movesCount"));
 
-    debugger;
     let howMany = !firstCardChecked ? 1 : gameState.cardsToTake - 2;
     if (howMany < 1) howMany = 1;
     if (firstCardChecked && gameState.cardsToTake < 2) howMany = 0;
@@ -227,7 +225,9 @@ export function takeCards(who) {
     if (!firstCardChecked || howMany)
       dispatch({ type: "TAKE_FROM_DECK", howMany });
 
-    let cardsToTake = howMany ? deck.slice(deck.length - howMany, deck.length) : [];
+    let cardsToTake = howMany
+      ? deck.slice(deck.length - howMany, deck.length)
+      : [];
     if (!firstCardChecked && howMany) cardsToTake[0].isForCheck = true;
 
     let newCardsWithTakenCards = sortCards([
@@ -235,9 +235,10 @@ export function takeCards(who) {
       ..._.cloneDeep(gameState[who].cards)
     ]);
 
-    newCardsWithTakenCards = newCardsWithTakenCards.map(
-      card => (card = _.omit(card, "isForCheck"))
-    );
+    if (firstCardChecked)
+      newCardsWithTakenCards = newCardsWithTakenCards.map(
+        card => (card = _.omit(card, "isForCheck"))
+      );
 
     if (who === "player") dispatch(updatePlayerCards(newCardsWithTakenCards));
     else dispatch(updateCpuCards(newCardsWithTakenCards));
@@ -250,7 +251,7 @@ export function takeCards(who) {
     }
 
     if (firstCardChecked) {
-      dispatch(updateGameFactor("firstCardChecked", false));
+      setTimeout(()=> dispatch(updateGameFactor("firstCardChecked", false)), 200);
       if (gameState.cardsToTake > 1)
         dispatch(updateGameFactor("cardsToTake", 1));
       if (gameState.jackActive)
@@ -279,7 +280,6 @@ export function makePlayerMove(cards) {
       cards = cards.map(card => (card = _.omit(card, "class")));
     }
 
-    debugger;
     let newPlayerCards = dispatch(verifyUsedCards(cards));
 
     if (gameState.firstCardChecked) {
@@ -424,7 +424,6 @@ function getAvailableCards() {
       pile,
       firstCardChecked
     } = gameState;
-    debugger;
 
     const pileTopCard = pile[pile.length - 1];
     const cards = !firstCardChecked
@@ -473,18 +472,18 @@ function hasCardsAvailable(availableCards) {
 function noCardsToUse() {
   return function(dispatch, getState) {
     const gameState = getState().gameState;
-    debugger;
     if (gameState.waitTurn > 0 || gameState.cpuPlayer.wait) {
       dispatch(waitTurns("cpuPlayer"));
-    }
-    if (!gameState.firstCardChecked) {
-      dispatch(takeCards("cpuPlayer"));
-      setTimeout(() => {
-        dispatch(makeCpuMove());
-      }, 500);
-    }
-    if (gameState.firstCardChecked) {
-      dispatch(takeCards("cpuPlayer"));
+    } else {
+      if (!gameState.firstCardChecked) {
+        dispatch(takeCards("cpuPlayer"));
+        setTimeout(() => {
+          dispatch(makeCpuMove());
+        }, 500);
+      }
+      if (gameState.firstCardChecked) {
+        dispatch(takeCards("cpuPlayer"));
+      }
     }
   };
 }

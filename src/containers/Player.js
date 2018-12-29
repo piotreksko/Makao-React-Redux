@@ -37,9 +37,12 @@ class Player extends Component {
     const firstTurn = this.isFirstTurn();
     const changed = this.haveCardsChanged(nextProps, nextState);
     const ended = this.hasCpuEndedTurn(nextProps);
+    if (ended) {
+      debugger;
+    }
     const playerTurnChanged =
       nextProps.gameState.isPlayerTurn !== this.props.gameState.isPlayerTurn;
-
+    if (playerTurnChanged) debugger;
     // if (changed || ended || firstTurn) return true;
     if (changed || ended || firstTurn || playerTurnChanged) return true;
     else return false;
@@ -63,7 +66,11 @@ class Player extends Component {
   }
 
   hasCpuEndedTurn(nextProps) {
-    return !nextProps.gameState.firstCardChecked && this.props.gameState.firstCardChecked 
+    return (
+      (!nextProps.gameState.firstCardChecked &&
+        this.props.gameState.firstCardChecked) ||
+      !_.isEqual(nextProps.gameState.cpuPlayer, this.props.gameState.cpuPlayer)
+    );
   }
 
   isFirstTurn() {
@@ -175,7 +182,6 @@ class Player extends Component {
       pile,
       firstCardChecked
     } = this.props.gameState;
-    debugger;
     let playerCards = player.cards;
     if (firstCardChecked)
       playerCards = playerCards.filter(card => card.isForCheck);
