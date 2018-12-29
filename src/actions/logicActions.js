@@ -396,6 +396,7 @@ export function makeCpuMove() {
     const gameState = getState().gameState;
     let cpuWait = gameState.cpuPlayer.wait;
 
+    debugger;
     if (getState().modals.gameOver) return;
     if (cpuWait) return dispatch(noCardsToUse());
     let availableCards = dispatch(getAvailableCards());
@@ -564,6 +565,7 @@ function checkCardsToUse(availableCards) {
     const cpuWait = gameState.cpuPlayer.wait;
     const playerCards = gameState.player.cards;
 
+    debugger;
     // Get information about cards of same type & weight
     let cpuCardsTypeAndWeight = getSameTypeAndWeightAmount(
       availableCards,
@@ -753,7 +755,8 @@ function setBestTopCard(cardsToUse) {
     const gameState = getState().gameState;
 
     const { pile, cpuPlayer, jackActive, chosenType, chosenWeight } = gameState;
-    const cpuCards = cpuPlayer.cards;
+    let cpuCards = cpuPlayer.cards;
+    if (gameState.firstCardChecked) cpuCards = cpuCards.filter((card) => card.isForCheck)
     const pileTopCard = pile[pile.length - 1];
     let mostMovesCard = getCardWithMostMoves(cardsToUse);
     let cpuSelectedCards = [];

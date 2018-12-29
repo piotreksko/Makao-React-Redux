@@ -78,7 +78,7 @@ export class Modals extends Component {
 
         <WhoStartsModal
           show={modals.whoStarts}
-          playerStarts={gameState.playerTurn}
+          playerStarts={gameState.isPlayerTurn}
         />
       </Aux>
     );

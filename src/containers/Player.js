@@ -22,7 +22,7 @@ class Player extends Component {
 
   componentWillMount() {
     if (this.props.gameState.isPlayerTurn) {
-      setTimeout(() => {
+        setTimeout(() => {
         this.checkAvailableCards();
       }, 1200);
     } else {
@@ -37,12 +37,9 @@ class Player extends Component {
     const firstTurn = this.isFirstTurn();
     const changed = this.haveCardsChanged(nextProps, nextState);
     const ended = this.hasCpuEndedTurn(nextProps);
-    if (ended) {
-      debugger;
-    }
     const playerTurnChanged =
       nextProps.gameState.isPlayerTurn !== this.props.gameState.isPlayerTurn;
-    if (playerTurnChanged) debugger;
+
     // if (changed || ended || firstTurn) return true;
     if (changed || ended || firstTurn || playerTurnChanged) return true;
     else return false;
