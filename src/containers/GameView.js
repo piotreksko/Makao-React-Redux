@@ -29,22 +29,10 @@ export class GameView extends Component {
     }, 1000);
   }
 
-  // shouldComponentUpdate(nextProps, nextState) {
-  //   debugger;
-  //   const cpuEndedMove = _.isEqual(
-  //     nextProps.gameState.cpuPlayer,
-  //     this.props.gameState.cpuPlayer
-  //   );
-
-  //   if (cpuEndedMove) {
-  //     return true;
-  //   } else return false;
-  // }
-
   takeCards() {
     if (this.props.gameState.firstCardChecked) this.props.makePlayerMove();
     else this.props.takeCards(this.props.gameState.cardsToTake);
-    
+
     if (this.props.gameState.firstCardChecked) {
       setTimeout(() => {
         this.props.endTurn();
