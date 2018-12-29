@@ -6,8 +6,9 @@ WORK in progress
 ### Working:
 * Game logic
 * AI
-* Sound effects
 * Stats tracking
+* Sound effects
+* Animations
 
 ### Things to do:
 
