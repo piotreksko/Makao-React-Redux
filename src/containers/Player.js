@@ -46,13 +46,12 @@ class Player extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const firstTurn = this.isFirstTurn();
     let clearSelectedCards =
       !_.isEqual(prevProps.gameState.player, this.props.gameState.player) &&
       this.state.selectedCards.length;
     let newSelectedCards = clearSelectedCards ? [] : this.state.selectedCards;
 
-    if (this.props.gameState.isPlayerTurn && !firstTurn)
+    if (this.props.gameState.isPlayerTurn)
       this.checkAvailableCards(newSelectedCards);
   }
 
@@ -64,10 +63,7 @@ class Player extends Component {
   }
 
   hasCpuEndedTurn(nextProps) {
-    return !_.isEqual(
-      nextProps.gameState.cpuPlayer,
-      this.props.gameState.cpuPlayer
-    );
+    return !nextProps.gameState.firstCardChecked && this.props.gameState.firstCardChecked 
   }
 
   isFirstTurn() {
@@ -144,7 +140,7 @@ class Player extends Component {
       !this.props.gameState.firstCardChecked
     )
       return;
-      
+
     if (
       this.props.gameState.firstCardChecked &&
       !this.state.selectedCards.length
@@ -179,6 +175,7 @@ class Player extends Component {
       pile,
       firstCardChecked
     } = this.props.gameState;
+    debugger;
     let playerCards = player.cards;
     if (firstCardChecked)
       playerCards = playerCards.filter(card => card.isForCheck);

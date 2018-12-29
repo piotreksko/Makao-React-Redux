@@ -91,6 +91,7 @@ export function waitTurns(who) {
     } else {
       dispatch({ type: "WAIT_TURNS", waitTurns: gameState[who].wait - 1, who });
     }
+    if (who === "player") dispatch(updateWhosTurn("player"));
   };
 }
 
@@ -117,7 +118,7 @@ export function addToPile(cards, who) {
 
     const gameState = getState().gameState;
     if (gameState.firstCardChecked) {
-      updateGameFactor("firstCardChecked", false);
+      dispatch(updateGameFactor("firstCardChecked", false));
     }
   };
 }
@@ -214,6 +215,7 @@ export function takeCards(who) {
     debugger;
     let howMany = !firstCardChecked ? 1 : gameState.cardsToTake - 2;
     if (howMany < 1) howMany = 1;
+    if (firstCardChecked && gameState.cardsToTake < 2) howMany = 0;
 
     // Check if there are enough cards on deck
     let deck = gameState.deck;
@@ -222,20 +224,20 @@ export function takeCards(who) {
       deck = getState().gameState.deck;
     }
 
-    dispatch({ type: "TAKE_FROM_DECK", howMany });
+    if (!firstCardChecked || howMany)
+      dispatch({ type: "TAKE_FROM_DECK", howMany });
 
-    let cardsToTake = deck.slice(deck.length - howMany, deck.length);
-    if (!firstCardChecked) cardsToTake[0].isForCheck = true;
-    else {
-      cardsToTake = cardsToTake.map(
-        card => (card = _.omit(card, "isForCheck"))
-      );
-    }
+    let cardsToTake = howMany ? deck.slice(deck.length - howMany, deck.length) : [];
+    if (!firstCardChecked && howMany) cardsToTake[0].isForCheck = true;
 
     let newCardsWithTakenCards = sortCards([
       ...cardsToTake,
       ..._.cloneDeep(gameState[who].cards)
     ]);
+
+    newCardsWithTakenCards = newCardsWithTakenCards.map(
+      card => (card = _.omit(card, "isForCheck"))
+    );
 
     if (who === "player") dispatch(updatePlayerCards(newCardsWithTakenCards));
     else dispatch(updateCpuCards(newCardsWithTakenCards));
@@ -255,7 +257,6 @@ export function takeCards(who) {
         dispatch(updateGameFactor("jackActive", gameState.jackActive - 1));
       if (gameState.battleCardActive)
         dispatch(updateGameFactor("battleCardActive", false));
-
     } else {
       dispatch(updateGameFactor("firstCardChecked", true));
     }
@@ -282,11 +283,7 @@ export function makePlayerMove(cards) {
     let newPlayerCards = dispatch(verifyUsedCards(cards));
 
     if (gameState.firstCardChecked) {
-      newPlayerCards = newPlayerCards.map(
-        card => (card = _.omit(card, "isForCheck"))
-      );
-      dispatch(updatePlayerCards(newPlayerCards));
-      if (gameState.cardsToTake > 1) dispatch(takeCards("player"));
+      dispatch(takeCards("player"));
     }
 
     if (cards.length) {
@@ -296,20 +293,15 @@ export function makePlayerMove(cards) {
 
     dispatch(checkMacaoAndWin());
 
-    if (gameState.firstCardChecked)
-      dispatch(updateGameFactor("firstCardChecked", false));
-
     const modals = getState().modals;
 
-    dispatch(updateWhosTurn('player'));
+    dispatch(updateWhosTurn("player"));
     if (!modals.ace && !modals.jack && !modals.gameOver) {
-
       setTimeout(() => {
         dispatch(makeCpuMove());
         dispatch(checkMacaoAndWin());
       }, 700);
     }
-
   };
 }
 
@@ -414,9 +406,10 @@ export function makeCpuMove() {
       dispatch(noCardsToUse());
     }
 
-    if (getState().gameState.firstCardChecked) updateGameFactor("firstCardChecked", false);
-    dispatch(updateWhosTurn('player'));
+    dispatch(checkMacaoAndWin());
 
+    if (gameState.firstCardChecked);
+    dispatch(updateWhosTurn("cpuPlayer"));
   };
 }
 
@@ -483,12 +476,15 @@ function noCardsToUse() {
     debugger;
     if (gameState.waitTurn > 0 || gameState.cpuPlayer.wait) {
       dispatch(waitTurns("cpuPlayer"));
-    } else {
-      if (gameState.firstCardChecked && gameState.cardsToTake > 1)
-        dispatch(takeCards("cpuPlayer"));
-      if (!gameState.firstCardChecked) {
-        setTimeout(dispatch(makeCpuMove()), 600);
-      }
+    }
+    if (!gameState.firstCardChecked) {
+      dispatch(takeCards("cpuPlayer"));
+      setTimeout(() => {
+        dispatch(makeCpuMove());
+      }, 500);
+    }
+    if (gameState.firstCardChecked) {
+      dispatch(takeCards("cpuPlayer"));
     }
   };
 }
