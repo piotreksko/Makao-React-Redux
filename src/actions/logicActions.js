@@ -91,7 +91,10 @@ export function waitTurns(who) {
     } else {
       dispatch({ type: "WAIT_TURNS", waitTurns: gameState[who].wait - 1, who });
     }
-    if (who === "player") dispatch(updateWhosTurn("player"));
+    if (who === "player") 
+    setTimeout(() => {
+      dispatch(updateWhosTurn("player"));
+    }, 50);
   };
 }
 
@@ -251,7 +254,10 @@ export function takeCards(who) {
     }
 
     if (firstCardChecked) {
-      setTimeout(()=> dispatch(updateGameFactor("firstCardChecked", false)), 200);
+      setTimeout(
+        () => dispatch(updateGameFactor("firstCardChecked", false)),
+        50
+      );
       if (gameState.cardsToTake > 1)
         dispatch(updateGameFactor("cardsToTake", 1));
       if (gameState.jackActive)
@@ -398,7 +404,7 @@ export function makeCpuMove() {
 
     debugger;
     if (getState().modals.gameOver) return;
-    if (cpuWait) return dispatch(noCardsToUse());
+    if (cpuWait) return dispatch(waitTurns("cpuPlayer"));
     let availableCards = dispatch(getAvailableCards());
 
     if (availableCards.length) {
@@ -756,7 +762,8 @@ function setBestTopCard(cardsToUse) {
 
     const { pile, cpuPlayer, jackActive, chosenType, chosenWeight } = gameState;
     let cpuCards = cpuPlayer.cards;
-    if (gameState.firstCardChecked) cpuCards = cpuCards.filter((card) => card.isForCheck)
+    if (gameState.firstCardChecked)
+      cpuCards = cpuCards.filter(card => card.isForCheck);
     const pileTopCard = pile[pile.length - 1];
     let mostMovesCard = getCardWithMostMoves(cardsToUse);
     let cpuSelectedCards = [];
