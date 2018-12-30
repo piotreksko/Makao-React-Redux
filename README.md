@@ -6,14 +6,14 @@ WORK in progress
 ### Working:
 * Game logic
 * AI
-* Sound effects
 * Stats tracking
+* Sound effects
+* Animations
 
 ### Things to do:
 
 * Tests
 * Improve AI algorithm
-* More features and small details
 
 ## [Live Demo ](https://makao-react.firebaseapp.com/)
 
@@ -85,4 +85,4 @@ Computer gets a random number between 1 and 83 - it get's 57.
 * If a King of Hearts is played or King of Spades is played, the player who must pick up cards can use King of Diamonds or King of Clubs to defend himself and not take any cards.
 * If an Ace is played, the player playing the Ace can call a suit suit of choice.
 
-Multiples action cards can be played, i.e. Player 1 plays three 2s and the next player in sequence must pick up 6 cards unless they have another 2. This is the same for 3's, 4's and Kings.
+Multiple action cards can be played, i.e. Player 1 plays three 2s and the next player in sequence must pick up 6 cards unless they have another 2. This is the same for 3's, 4's and Kings.
