@@ -22,7 +22,7 @@ class Player extends Component {
 
   componentWillMount() {
     if (this.props.gameState.isPlayerTurn) {
-        setTimeout(() => {
+      setTimeout(() => {
         this.checkAvailableCards();
       }, 1200);
     } else {
@@ -40,8 +40,8 @@ class Player extends Component {
     const playerTurnChanged =
       nextProps.gameState.isPlayerTurn !== this.props.gameState.isPlayerTurn;
 
-    // if (changed || ended || firstTurn) return true;
-    if (changed || ended || firstTurn || playerTurnChanged) return true;
+    if (changed || ended || firstTurn || playerTurnChanged)
+      return true;
     else return false;
   }
 
@@ -487,7 +487,8 @@ class Player extends Component {
 const mapStateToProps = state => {
   return {
     gameState: state.gameState,
-    stats: state.stats
+    stats: state.stats,
+    modals: state.modals
   };
 };
 
@@ -495,6 +496,7 @@ const mapDispatchToProps = dispatch => {
   return {
     makePlayerMove: cards => dispatch(logicActions.makePlayerMove(cards)),
     playerWait: () => dispatch(logicActions.waitTurns("player")),
+    makeCpuMove: () => dispatch(logicActions.makeCpuMove()),
     endTurn: () => {
       dispatch(logicActions.updateGameFactor("isPlayerTurn", false));
       dispatch(logicActions.makeCpuMove());

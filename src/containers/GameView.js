@@ -44,12 +44,6 @@ export class GameView extends Component {
     this.props.playSound("click");
     this.props.restartGame();
 
-    // if (!this.props.gameState.isPlayerTurn) {
-    //   setTimeout(() => {
-    //     this.props.endTurn();
-    //   }, 800);
-    // }
-
     this.props.hideModal("gameOver");
     setTimeout(() => {
       this.props.showModal("whoStarts");
