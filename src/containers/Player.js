@@ -37,11 +37,11 @@ class Player extends Component {
     const firstTurn = this.isFirstTurn();
     const changed = this.haveCardsChanged(nextProps, nextState);
     const ended = this.hasCpuEndedTurn(nextProps);
+    debugger;
     const playerTurnChanged =
       nextProps.gameState.isPlayerTurn !== this.props.gameState.isPlayerTurn;
 
-    if (changed || ended || firstTurn || playerTurnChanged)
-      return true;
+    if (changed || ended || firstTurn || playerTurnChanged) return true;
     else return false;
   }
 
@@ -50,6 +50,7 @@ class Player extends Component {
       !_.isEqual(prevProps.gameState.player, this.props.gameState.player) &&
       this.state.selectedCards.length;
     let newSelectedCards = clearSelectedCards ? [] : this.state.selectedCards;
+    debugger;
 
     if (this.props.gameState.isPlayerTurn)
       this.checkAvailableCards(newSelectedCards);
@@ -87,8 +88,7 @@ class Player extends Component {
     if (!card.class) return;
     let newSelected = _.cloneDeep(this.state.selectedCards);
 
-    const randomSoundNumber = Math.floor(Math.random() * 3) + 1;
-    this.props.playSound(`pick_card${randomSoundNumber}`);
+    this.props.playSound(`pick_card2`);
 
     let playerCards = this.props.gameState.player.cards;
 
@@ -236,6 +236,7 @@ class Player extends Component {
         (card.type === "2" || card.type === "3")) ||
       // Kings - spades and hearts
       (card.type === "king" &&
+        pileTopCard.type === "king" &&
         card.weight === pileTopCard.weight &&
         (card.weight === "spades" || card.weight === "hearts")) ||
       // If last card was a battle king, make king of diamond and clubs available

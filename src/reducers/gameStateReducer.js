@@ -58,8 +58,8 @@ const initialState = () => {
 
   // Deal cards
   (function assignCards() {
-    initGame.player.cards = sortCards(initGame.deck.splice(0, 5));
-    initGame.cpuPlayer.cards = sortCards(initGame.deck.splice(0, 5));
+    initGame.player.cards = sortCards(initGame.deck.splice(0, 15));
+    initGame.cpuPlayer.cards = sortCards(initGame.deck.splice(0, 15));
 
     // Always start game with a neutral card
     for (let i = 0; i < initGame.deck.length; i++) {
