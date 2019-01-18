@@ -16,7 +16,7 @@ import { cardTypes, cardWeights } from "../constants/constants";
 import { sortCards } from "../utility/utility";
 import _ from "lodash";
 
-const initialState = () => {
+export const initialState = () => {
   let initGame = {
     player: {
       cards: [],
