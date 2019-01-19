@@ -18,11 +18,6 @@ class Card extends Component {
       }
     }
 
-    // debugger;
-    // if (this.props.card.isForCheck) {
-    //   this.props.cardClass += ' for-check';
-    // }
-
     return (
       <div
         onClick={
@@ -38,7 +33,11 @@ class Card extends Component {
 }
 
 Card.propTypes = {
-  card: PropTypes.object
+  card: PropTypes.object,
+  index: PropTypes.number,
+  fromPile: PropTypes.bool,
+  cardClass: PropTypes.string,
+  clickOwnCard: PropTypes.func,
 };
 
 export default Card;
