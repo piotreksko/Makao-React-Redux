@@ -27,6 +27,12 @@ describe("BattleIcon", () => {
     props.jackActive = true;
   });
 
+  it("does not render", () => {
+    props.jackActive = false
+    const div = component().find("div");
+    expect(div.length).toBe(0);
+  });
+
   it("renders 2 divs", () => {
     const div = component().find("div");
     expect(div.length).toBe(2);

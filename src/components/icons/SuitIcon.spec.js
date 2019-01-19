@@ -3,7 +3,7 @@ import { shallow } from "enzyme";
 import SuitIcon from "./SuitIcon";
 
 describe("SuitIcon", () => {
-  const weight = "spades";
+  const weights = ["spades", "hearts", "diamonds", "clubs"];
   let props;
   let wrapper;
   const component = () => {
@@ -17,7 +17,7 @@ describe("SuitIcon", () => {
     props = {
       show: true,
       gameOver: false,
-      chosenWeight: weight
+      chosenWeight: undefined
     };
     wrapper = undefined;
   });
@@ -39,9 +39,18 @@ describe("SuitIcon", () => {
   });
 
   it("has given symbol as an image", () => {
-    props.chosenWeight = weight;
+    // doesn't work
+
+    // props.chosenWeight = weights[0];
+    // weights.forEach((weight)=> {
+    //   props.chosenWeight = weight;
+    //   const img = component().find('img');
+    //   expect(img.prop('src')).toEqual(`${weight}_symbol.png`)
+    // })
+
+    props.chosenWeight = weights[0];
     const img = component().find("img");
-    expect(img.prop("src")).toEqual("spades_symbol.png");
+    expect(img.prop("src")).toEqual(`${weights[0]}_symbol.png`);
   });
 
   it('has a "modal-shown" class', () => {

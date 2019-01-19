@@ -31,6 +31,11 @@ describe("WaitIcon", () => {
     expect(div.length).toBe(2);
   });
 
+  it('has a "modal-shown" class', () => {
+    const div = component().find("div.blue-icon");
+    expect(div.hasClass("modal-shown"));
+  });
+
   it("shows the amount of turns to wait", () => {
     const div = component().find("div.blue-icon");
     expect(div.text()).toEqual("3");

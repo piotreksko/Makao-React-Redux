@@ -31,10 +31,7 @@ const SuitIcon = props => {
   };
 
   return props.show && !props.gameOver ? (
-    <div
-      className={`info-icon ${props.show ? "modal-shown" : "modal-hidden"}`}
-      style={style}
-    >
+    <div className={"info-icon modal-shown"} style={style}>
       <img
         alt="Chosen weight symbol"
         className="icon-image grey-icon"
@@ -47,7 +44,7 @@ const SuitIcon = props => {
 SuitIcon.propTypes = {
   show: PropTypes.bool,
   gameOver: PropTypes.bool,
-  chosenWeight: PropTypes.string,
+  chosenWeight: PropTypes.string
 };
 
 export default SuitIcon;

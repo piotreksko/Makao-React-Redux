@@ -7,12 +7,7 @@ const BattleIcon = props => {
       "url(https://cdn.iconscout.com/icon/premium/png-256-thumb/swords-56-798933.png)"
   };
   return props.battleCards > 1 ? (
-    <div
-      className={`info-icon ${
-        props.battleCards > 1 ? "modal-shown" : "modal-hidden"
-      }`}
-      style={style}
-    >
+    <div className={"info-icon modal-shown"} style={style}>
       <div className="red-icon">{props.battleCards - 1}</div>
     </div>
   ) : null;
