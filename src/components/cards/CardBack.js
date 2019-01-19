@@ -18,9 +18,11 @@ const card = props => {
 };
 
 card.propTypes = {
-  playerCanMove: PropTypes.bool,
+  number: PropTypes.number,
+  takeCard: PropTypes.func,
   deckCard: PropTypes.bool,
-  takeCardFromDeck: PropTypes.func
+  highlight: PropTypes.bool,
+  playerCanMove: PropTypes.bool
 }
 
 export default card;

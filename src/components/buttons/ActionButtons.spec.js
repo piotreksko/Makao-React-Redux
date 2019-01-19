@@ -5,13 +5,13 @@ import ActionButtons from "./ActionButtons";
 describe("action buttons", () => {
   let props;
   let wrapper;
+  const mockFn = jest.fn();
   const actionButtons = () => {
     if (!wrapper) {
       wrapper = shallow(<ActionButtons {...props} />);
     }
     return wrapper;
   };
-  const mockFn = jest.fn();
 
   beforeEach(() => {
     props = {
