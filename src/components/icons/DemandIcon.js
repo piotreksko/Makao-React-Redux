@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 
 const DemandIcon = props => {
   let style = {
@@ -17,5 +18,10 @@ const DemandIcon = props => {
   ) : null;
 };
 
+DemandIcon.propTypes = {
+  gameOver: PropTypes.bool,
+  jackActive: PropTypes.bool,
+  chosenType: PropTypes.string
+};
 
 export default DemandIcon;

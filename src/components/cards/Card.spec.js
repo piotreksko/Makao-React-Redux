@@ -3,6 +3,7 @@ import { shallow } from "enzyme";
 import Card from "./Card";
 
 describe("Card", () => {
+  const card = { weight: "spades", type: "ace" };
   let props;
   let wrapper;
   const mockFn = jest.fn();
@@ -15,7 +16,7 @@ describe("Card", () => {
 
   beforeEach(() => {
     props = {
-      card: { weight: "spades", type: "ace" },
+      card: card,
       index: 3,
       fromPile: undefined,
       clickOwnCard: undefined
@@ -35,7 +36,6 @@ describe("Card", () => {
     });
 
     it("should have a background image with a given card", () => {
-      props.card = { weight: "spades", type: "ace" };
       expect(component().find('div').props().style).toHaveProperty(
         "backgroundImage",
     'url(ace_of_spades.png)'
@@ -43,7 +43,7 @@ describe("Card", () => {
     });
   });
 
-  describe("clickability", () => {
+  describe("when a card is clicked", () => {
     it("should not be clickable", () => {
       const wrapper = component().find("div");
       wrapper.simulate("click");
@@ -54,7 +54,7 @@ describe("Card", () => {
       props.clickOwnCard = mockFn;
       const wrapper = component().find("div");
       wrapper.simulate("click");
-      expect(mockFn).toHaveBeenCalledWith({ weight: "spades", type: "ace" }, 3);
+      expect(mockFn).toHaveBeenCalledWith(card, 3);
     });
   });
 });

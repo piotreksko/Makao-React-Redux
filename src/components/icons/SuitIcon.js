@@ -1,34 +1,33 @@
 import React from "react";
+import heartsSymbol from "../../content/images/symbols/hearts_symbol.png";
+import diamondsSymbol from "../../content/images/symbols/diamonds_symbol.png";
+import clubsSymbol from "../../content/images/symbols/clubs_symbol.png";
+import spadesSymbol from "../../content/images/symbols/spades_symbol.png";
+import changeIcon from "../../content/images/change_icon.png";
+import PropTypes from "prop-types";
 
 const SuitIcon = props => {
   let img;
 
   switch (props.chosenWeight) {
     case "spades":
-      img = "https://image.freepik.com/free-icon/spades-symbol_318-40683.jpg";
+      img = spadesSymbol;
       break;
     case "clubs":
-      img = "http://www.clker.com/cliparts/U/3/0/g/Z/y/carte-de-trefla-md.png";
+      img = clubsSymbol;
       break;
     case "diamonds":
-      img =
-        "https://www.spreadshirt.com/image-server/v1/designs/11631716,width=178,height=178/card-suit-diamond.png";
+      img = heartsSymbol;
       break;
     case "hearts":
-      img =
-        "https://upload.wikimedia.org/wikipedia/commons/7/77/Heart_symbol_c00.png";
+      img = diamondsSymbol;
       break;
     default:
       break;
   }
 
-  // let style = {
-  //   backgroundImage: "url(" + img + ")"
-  // };
-
   let style = {
-    backgroundImage:
-      "url(https://cdn1.iconfinder.com/data/icons/ui-glynh-04-of-5/100/UI_Glyph_07-07-512.png)"
+    backgroundImage: changeIcon
   };
 
   return props.show && !props.gameOver ? (
@@ -37,13 +36,18 @@ const SuitIcon = props => {
       style={style}
     >
       <img
-            alt="Chosen weight symbol"
-            className="icon-image grey-icon"
-            src={img}
-          />
+        alt="Chosen weight symbol"
+        className="icon-image grey-icon"
+        src={img}
+      />
     </div>
-
   ) : null;
+};
+
+SuitIcon.propTypes = {
+  show: PropTypes.bool,
+  gameOver: PropTypes.bool,
+  chosenWeight: PropTypes.string,
 };
 
 export default SuitIcon;

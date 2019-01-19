@@ -46,6 +46,13 @@ describe("CardBack", () => {
       expect(component.hasClass("deckPossible"));
     });
 
+    it('should not have "deckPossible" class', () => {
+      props.highlight = true;
+      props.playerCanMove = true;
+      props.deckCard = false;
+      expect(cardBack().find('div.deckPossible').length).toBe(0);
+    });
+
     it('should have custom translateY style', () => {
       props.number = 3;
       props.deckCard = true;
@@ -53,7 +60,7 @@ describe("CardBack", () => {
     });
   });
 
-  describe("clickability", () => {
+  describe("when a card is clicked", () => {
     beforeEach(() => {
       props.takeCard = mockFn;
     });

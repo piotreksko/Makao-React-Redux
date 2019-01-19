@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 
 const WaitIcon = props => {
   let style = {
@@ -17,5 +18,10 @@ const WaitIcon = props => {
     </div>
   ) : null;
 };
+
+WaitIcon.propTypes = {
+  gameOver: PropTypes.bool,
+  waitTurn: PropTypes.number
+}
 
 export default WaitIcon;

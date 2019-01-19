@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 
 const BattleIcon = props => {
   let style = {
@@ -15,6 +16,10 @@ const BattleIcon = props => {
       <div className="red-icon">{props.battleCards - 1}</div>
     </div>
   ) : null;
+};
+
+BattleIcon.propTypes = {
+  battleCards: PropTypes.number
 };
 
 export default BattleIcon;
