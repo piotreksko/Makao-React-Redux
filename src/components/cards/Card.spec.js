@@ -3,7 +3,10 @@ import { shallow } from "enzyme";
 import Card from "./Card";
 
 describe("Card", () => {
-  const card = { weight: "spades", type: "ace" };
+  const card = {
+    weight: "spades",
+    type: "ace"
+  };
   let props;
   let wrapper;
   const mockFn = jest.fn();
@@ -32,14 +35,54 @@ describe("Card", () => {
   describe("card classes and styles", () => {
     it('should have "card" class', () => {
       props.cardClass = "topCard selected cardsInHand";
-      expect(component().find('div').hasClass("selected"));
+      expect(
+        component()
+          .find("div")
+          .hasClass("selected")
+      );
     });
 
     it("should have a background image with a given card", () => {
-      expect(component().find('div').props().style).toHaveProperty(
-        "backgroundImage",
-    'url(ace_of_spades.png)'
-      );
+      expect(
+        component()
+          .find("div")
+          .props().style
+      ).toHaveProperty("backgroundImage", "url(ace_of_spades.png)");
+    });
+
+    describe("card from pile", () => {
+      beforeEach(() => {
+        props.fromPile = true;
+      });
+
+      it("should have absolute position", () => {
+        props.card.transform = { rotate: 9, x: 7, y: -3 }
+        expect(
+          component()
+            .find("div")
+            .props().style
+        ).toHaveProperty("position", "absolute");
+      });
+
+      it("should not have translate style", () => {
+        expect(
+          component()
+            .find("div")
+            .props().style
+        ).not.toHaveProperty("transform", "");
+      });
+
+      it("should have translate style", () => {
+        expect(
+          component()
+            .find("div")
+            .props().style
+        ).toHaveProperty(
+          "transform",
+          `rotate(${card.transform.rotate}deg) translate(${
+            card.transform.x}px, ${card.transform.y}px)`
+        );
+      });
     });
   });
 

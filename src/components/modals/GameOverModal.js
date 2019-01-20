@@ -1,5 +1,6 @@
 import React from "react";
 import restartButton from '../../content/images/restart_button.png'
+import PropTypes from 'prop-types';
 
 export default function GameOverModal(props) {
   return (
@@ -20,4 +21,10 @@ export default function GameOverModal(props) {
       <h5 style={{ color: "white" }}>Play again</h5>
     </div>
   );
+}
+
+GameOverModal.propTypes = {
+  show: PropTypes.bool,
+  playerWon: PropTypes.bool,
+  restartGame: PropTypes.func
 }

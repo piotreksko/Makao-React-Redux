@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 
 export default function DemandCardModal(props) {
   return (
@@ -32,4 +33,8 @@ export default function DemandCardModal(props) {
       </div>
     </div>
   );
+}
+
+DemandCardModal.propTypes = {
+  demandCard: PropTypes.func
 }
