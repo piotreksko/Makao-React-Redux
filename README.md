@@ -1,7 +1,11 @@
 # Makao - React/Redux
 
 My favorite cards game - Makao. 
-WORK in progress
+
+## [Live Demo (click)](https://makao-react.firebaseapp.com/)
+
+![Demo](demo.gif)
+
 
 ### Working:
 * Game logic
@@ -14,10 +18,6 @@ WORK in progress
 
 * More tests
 * Improve AI algorithm
-
-## [Live Demo (click)](https://makao-react.firebaseapp.com/)
-
-![Demo](demo.gif)
 
 ## About 
 In this game you can play a 1v1 game of a cards game called [Macao](https://en.wikipedia.org/wiki/Macau_(card_game)) 
