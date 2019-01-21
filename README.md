@@ -12,12 +12,10 @@ WORK in progress
 
 ### Things to do:
 
-* Tests
+* More tests
 * Improve AI algorithm
 
-## [Live Demo ](https://makao-react.firebaseapp.com/)
-
-Reweritten from a jQuery version - https://github.com/piotreksko/Makao
+## [Live Demo (click)](https://makao-react.firebaseapp.com/)
 
 ![Demo](demo.gif)
 
