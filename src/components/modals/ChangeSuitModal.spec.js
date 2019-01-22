@@ -1,12 +1,12 @@
 import React from "react";
 import { shallow } from "enzyme";
 import ChangeSuitModal from "./ChangeSuitModal";
+import { cardSuits } from '../../constants/constants';
 
 describe("change suit modal", () => {
   let props;
   let wrapper;
   const mockFn = jest.fn();
-  const weights = ["hearts", "diamonds", "clubs", "hearts"];
   const modal = () => {
     if (!wrapper) {
       wrapper = shallow(<ChangeSuitModal {...props} />);
@@ -27,12 +27,12 @@ describe("change suit modal", () => {
   });
 
   it("should call a function when clicked", () => {
-    weights.forEach((weight, idx) => {
-      const button = modal()
-        .find("button")
+    cardSuits.forEach((suit, idx) => {
+      const ModalButton = modal()
+        .find("ModalButton")
         .at(idx);
-      button.simulate("click");
-      expect(mockFn).toHaveBeenCalledWith(weight);
+      ModalButton.simulate("click");
+      expect(mockFn).toHaveBeenCalledWith(suit);
     });
   });
 });

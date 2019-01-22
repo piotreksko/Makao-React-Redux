@@ -37,7 +37,6 @@ class Player extends Component {
     const firstTurn = this.isFirstTurn();
     const changed = this.haveCardsChanged(nextProps, nextState);
     const ended = this.hasCpuEndedTurn(nextProps);
-    debugger;
     const playerTurnChanged =
       nextProps.gameState.isPlayerTurn !== this.props.gameState.isPlayerTurn;
 
@@ -50,7 +49,6 @@ class Player extends Component {
       !_.isEqual(prevProps.gameState.player, this.props.gameState.player) &&
       this.state.selectedCards.length;
     let newSelectedCards = clearSelectedCards ? [] : this.state.selectedCards;
-    debugger;
 
     if (this.props.gameState.isPlayerTurn)
       this.checkAvailableCards(newSelectedCards);

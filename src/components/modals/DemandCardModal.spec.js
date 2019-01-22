@@ -1,5 +1,5 @@
 import React from "react";
-import { shallow } from "enzyme";
+import { mount } from "enzyme";
 import DemandCardModal from "./DemandCardModal";
 
 describe("demand card modal", () => {
@@ -9,7 +9,7 @@ describe("demand card modal", () => {
   const mockFn = jest.fn();
   const modal = () => {
     if (!wrapper) {
-      wrapper = shallow(<DemandCardModal {...props} />);
+      wrapper = mount(<DemandCardModal {...props} />);
     }
     return wrapper;
   };
@@ -28,10 +28,10 @@ describe("demand card modal", () => {
 
   it("should call a function when clicked", () => {
     cardsToDemand.forEach((card, idx) => {
-      const button = modal()
-        .find("button")
+      const ModalButton = modal()
+        .find("ModalButton")
         .at(idx);
-      button.simulate("click");
+      ModalButton.simulate("click");
       expect(mockFn).toHaveBeenCalledWith(card);
     });
   });

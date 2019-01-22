@@ -55,8 +55,8 @@ describe("game over modal", () => {
 
     it("should call a function when buttons is clicked", () => {
       props.restartGame = mockFn;
-      const button = modal().find("button");
-      button.simulate("click");
+      const ModalButton = modal().find("ModalButton");
+      ModalButton.simulate("click");
       expect(mockFn).toHaveBeenCalled();
     });
   });

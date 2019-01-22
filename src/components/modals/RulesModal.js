@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 
 export default function RulesDialog(props) {
   return (
@@ -81,4 +82,8 @@ export default function RulesDialog(props) {
         </span>
     </div>
   );
+}
+
+RulesDialog.propTypes = {
+  close: PropTypes.func
 }

@@ -14,4 +14,4 @@ export const cardTypes = [
   "ace"
 ];
 
-export const cardWeights = ["clubs", "diamonds", "spades", "hearts"];
+export const cardSuits = ["clubs", "diamonds", "spades", "hearts"];

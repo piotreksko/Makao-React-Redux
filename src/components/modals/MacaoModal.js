@@ -1,4 +1,5 @@
-import React from 'react'
+import React from "react";
+import PropTypes from "prop-types";
 
 export default function MacaoModal(props) {
   return (
@@ -13,9 +14,19 @@ export default function MacaoModal(props) {
       }}
     >
       <h4 style={{ color: "white", margin: 10, padding: 10 }}>
-        {props.playerMacao ? "You: Macao!" : null} <br/>
-        {props.cpuPlayerMacao ? "Computer: Macao!" : null}
+        {props.playerMacao
+          ? "You: Macao!"
+          : props.cpuPlayerMacao
+          ? "Computer: Macao!"
+          : ""}
+        <br />
       </h4>
     </div>
-  )
+  );
 }
+
+MacaoModal.propTypes = {
+  show: PropTypes.bool,
+  playerMacao: PropTypes.bool,
+  cpuPlayerMacao: PropTypes.bool
+};

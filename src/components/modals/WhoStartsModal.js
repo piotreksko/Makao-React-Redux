@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 
 export default function WhoStartsModal(props) {
   return (
@@ -18,3 +19,8 @@ export default function WhoStartsModal(props) {
     </div>
   );
 }
+
+WhoStartsModal.propTypes = {
+  show: PropTypes.bool,
+  playerStarts: PropTypes.bool
+};

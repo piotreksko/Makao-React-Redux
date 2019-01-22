@@ -12,7 +12,7 @@ import {
   WAIT_TURNS,
   RESTART_GAME
 } from "../actions/logicActions";
-import { cardTypes, cardWeights } from "../constants/constants";
+import { cardTypes, cardSuits } from "../constants/constants";
 import { sortCards } from "../utility/utility";
 import _ from "lodash";
 
@@ -46,7 +46,7 @@ export const initialState = () => {
   }
 
   (function createDeck() {
-    cardWeights.forEach(weight => {
+    cardSuits.forEach(weight => {
       cardTypes.forEach(type => {
         initGame.deck.push(new card(type, weight));
       });
