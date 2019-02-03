@@ -5,8 +5,6 @@ import { checkSoundsToPlay } from "./soundActions";
 const middlewares = [thunk];
 const mockStore = configureStore(middlewares);
 
-// You would import the action from your codebase in a real scenario
-
 describe("sound actions", () => {
   const initialState = {};
   let store;

@@ -2,12 +2,14 @@ import _ from "lodash";
 import { sortCards } from "../utility/utility";
 import * as statsActions from "./statsActions";
 import { checkSoundsToPlay, playSound } from "./soundActions";
+export const ADD_TO_DECK = 'ADD_TO_DECK'
+export const NEW_GAME = 'NEW_GAME'
+export const UPDATE_GAME_FACTOR = 'UPDATE_GAME_FACTOR'
 export const UPDATE_PLAYER_CARDS = "UPDATE_PLAYER_CARDS";
 export const UPDATE_CPU_CARDS = "UPDATE_CPU_CARDS";
 export const UPDATE_WHOS_TURN = "UPDATE_WHOS_TURN";
 export const TAKE_FROM_DECK = "TAKE_FROM_DECK";
 export const ADD_TO_PILE = "ADD_TO_PILE";
-export const UPDATE_GAME_FACTOR = "UPDATE_GAME_FACTOR";
 export const WAIT_TURNS = "WAIT_TURNS";
 export const FETCH_STATS = "FETCH_STATS";
 export const CHANGE_SUIT = "CHANGE_SUIT";
@@ -18,7 +20,7 @@ export const RESTART_GAME = "RESTART_GAME";
 export function addToDeck(cards) {
   return dispatch => {
     dispatch({
-      type: "ADD_TO_DECK",
+      type: ADD_TO_DECK,
       cards
     });
   };
@@ -27,7 +29,7 @@ export function addToDeck(cards) {
 export function newGame() {
   return dispatch => {
     dispatch({
-      type: "NEW_GAME"
+      type: NEW_GAME,
     });
   };
 }
@@ -36,7 +38,7 @@ export function updateGameFactor(factor, value) {
   return dispatch => {
     dispatch(checkSoundsToPlay(factor, value));
     dispatch({
-      type: "UPDATE_GAME_FACTOR",
+      type: UPDATE_GAME_FACTOR,
       factor,
       value
     });
