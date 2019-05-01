@@ -15,7 +15,9 @@ import CpuPlayer from "../components/CpuPlayer";
 export class GameView extends Component {
   constructor(props) {
     super(props);
-
+    this.state = {
+      canTakeCard: true
+    };
     this.takeCards = this.takeCards.bind(this);
     this.restartGame = this.restartGame.bind(this);
   }
@@ -29,14 +31,28 @@ export class GameView extends Component {
     }, 1000);
   }
 
-  takeCards() {
-    if (this.props.gameState.firstCardChecked) this.props.makePlayerMove();
-    else this.props.takeCards(this.props.gameState.cardsToTake);
+  componentDidUpdate(prevProps) {
+    if (!prevProps.gameState.isPlayerTurn && this.props.gameState.isPlayerTurn) {
+      this.setState({ canTakeCard: true });
+    }
+  }
 
-    if (this.props.gameState.firstCardChecked) {
-      setTimeout(() => {
-        this.props.endTurn();
-      }, 1000);
+  takeCards() {
+    const { gameState, takeCards, makePlayerMove } = this.props;
+    const { firstCardChecked, cardsToTake } = gameState;
+
+    if (this.state.canTakeCard) {
+      this.setState({ canTakeCard: false });
+      if (firstCardChecked) makePlayerMove();
+      else takeCards(cardsToTake);
+
+      if (firstCardChecked) {
+        setTimeout(() => {
+          this.props.endTurn();
+        }, 1000);
+      }
+      if (cardsToTake > 1 && !firstCardChecked)
+        this.setState({ canTakeCard: true });
     }
   }
 
@@ -83,6 +99,7 @@ export class GameView extends Component {
             takeCard={this.takeCards}
             playerCanMove={playerCanMove}
             cardsInDeck={gameState.deck.length}
+            cardsToTake={gameState.cardsToTake}
             isPlayerTurn={gameState.isPlayerTurn}
             firstCardChecked={gameState.firstCardChecked}
           />
