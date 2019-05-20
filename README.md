@@ -2,20 +2,23 @@
 
 My favorite cards game - Makao. 
 
+I am currently working on a multiplayer version of this game using Node.js, MongoDB and GraphQL subscriptions. (WIP)
+
 ## [Live Demo (click)](https://makao-react.firebaseapp.com/)
 
 ![Demo](demo.gif)
 
 
-### Working:
+### Done:
 * Game logic
 * AI
 * Stats tracking
 * Sound effects
 * Animations
 
-### Things to do:
+### To do:
 
+* Tutorial for new players
 * More tests
 * Improve AI algorithm
 
